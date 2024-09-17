@@ -1,6 +1,6 @@
 
-from process_image import get_blobs
-from process_image import BlobTuple
+from src.blob_extraction import get_blobs
+from src.blob_extraction import BlobTuple
 from copy import deepcopy
 
 

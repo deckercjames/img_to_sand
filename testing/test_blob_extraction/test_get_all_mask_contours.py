@@ -1,5 +1,5 @@
 
-from process_image import get_all_mask_contours
+from src.blob_extraction import get_all_mask_contours
 from copy import deepcopy
 
 

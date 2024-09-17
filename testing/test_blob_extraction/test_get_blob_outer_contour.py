@@ -1,5 +1,5 @@
 
-from process_image import get_blob_outer_contour
+from src.blob_extraction import get_blob_outer_contour
 from copy import deepcopy
 
 

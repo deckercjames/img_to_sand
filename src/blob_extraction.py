@@ -1,9 +1,9 @@
 
-import sys
 from enum import Enum
 from collections import namedtuple
-from copy import deepcopy
 
+
+BlobTuple = namedtuple("Blob", ["mask", "outer_contour", "void_contours", "sub_blobs"])
 
 class MoveDir(Enum):
     NORTH = 0,
@@ -34,6 +34,7 @@ blob_contour_priority_dir_check = {
     ),
 }
 
+
 def move_direction(current_pos, dir):
     if dir == MoveDir.NORTH:
         return (current_pos[0] - 1, current_pos[1])
@@ -43,6 +44,7 @@ def move_direction(current_pos, dir):
         return (current_pos[0], current_pos[1] + 1)
     if dir == MoveDir.WEST:
         return (current_pos[0], current_pos[1] -1 )
+
 
 def check_pixel(pixel_grid, r, c):
     if r < 0 or r >= len(pixel_grid):
@@ -58,6 +60,10 @@ def check_blob_mask_pixel(blob_mask, r, c):
     if c < 0 or c >= len(blob_mask[r]):
         return False
     return blob_mask[r][c]
+
+
+def get_list_element_cyclic(list, i):
+    return list[i % len(list)]
 
 
 def get_flood_fill_blob_mask(pixel_grid, r, c):
@@ -163,7 +169,6 @@ def get_blob_outer_contour(blob_mask, r, c):
         contour.append(current_pos)
         current_pos = move_direction(current_pos, move_option[0])
         last_move_dir = move_option[0]
-        pass
     
     return contour
 
@@ -197,8 +202,6 @@ def grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
     return [[(grid_mask[r][c] and not grid_mask_subtrahend[r][c]) for c in range(len(grid_mask[r]))] for r in range(len(grid_mask))]
 
 
-BlobTuple = namedtuple("Blob", ["mask", "outer_contour", "void_contours", "sub_blobs"])
-
 def get_blobs(pixel_grid, grid_mask=None):
     """
     Arguments:
@@ -230,17 +233,6 @@ def get_blobs(pixel_grid, grid_mask=None):
             sub_blobs = get_blobs(pixel_grid, grid_mask=sub_blob_mask)
             blob = BlobTuple(blob_mask, blob_outer_contour, void_contours, sub_blobs)
             blobs.append(blob)
-            pass
     
     return blobs
 
-
-def get_list_element_cyclic(list, i):
-    return list[i % len(list)]
-
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -1,5 +1,5 @@
 
-from process_image import get_total_blob_mask
+from src.blob_extraction import get_total_blob_mask
 from copy import deepcopy
 
 
