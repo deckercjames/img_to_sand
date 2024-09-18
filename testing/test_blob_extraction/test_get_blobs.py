@@ -14,16 +14,20 @@ def test_get_blobs_basic():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(1,2), (1,3), (1,4), (2,4), (2,3), (2,2)],
             # Blob mask
             [
                 [False, False, False, False, False],
                 [False, False, True,  True,  False],
                 [False, False, False, False, False],
             ],
-            # Outer contour
-            [(1,2), (1,3), (1,4), (2,4), (2,3), (2,2)],
-            # Void contours
-            [],
+            # Total mask
+            [
+                [False, False, False, False, False],
+                [False, False, True,  True,  False],
+                [False, False, False, False, False],
+            ],
             # Sub-blobs
             [],
         ),
@@ -42,28 +46,34 @@ def test_get_blobs_two():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(0,1), (0,2), (1,2), (1,1)],
             # Blob mask
             [
                 [False, True ],
                 [False, False],
             ],
-            # Outer contour
-            [(0,1), (0,2), (1,2), (1,1)],
-            # Void contours
-            [],
+            # Total mask
+            [
+                [False, True ],
+                [False, False],
+            ],
             # Sub-blobs
             [],
         ),
         BlobTuple(
+            # Outer contour
+            [(1,0), (1,1), (2,1), (2,0)],
             # Blob mask
             [
                 [False, False],
                 [True,  False],
             ],
-            # Outer contour
-            [(1,0), (1,1), (2,1), (2,0)],
-            # Void contours
-            [],
+            # Total mask
+            [
+                [False, False],
+                [True,  False],
+            ],
             # Sub-blobs
             [],
         ),
@@ -81,26 +91,30 @@ def test_get_two_blobs_adjacent():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(0,0), (0,1), (1,1), (1,0)],
             # Blob mask
             [
                 [True, False],
             ],
-            # Outer contour
-            [(0,0), (0,1), (1,1), (1,0)],
-            # Void contours
-            [],
+            # Total mask
+            [
+                [True, False],
+            ],
             # Sub-blobs
             [],
         ),
         BlobTuple(
+            # Outer contour
+            [(0,1), (0,2), (1,2), (1,1)],
             # Blob mask
             [
                 [False, True],
             ],
-            # Outer contour
-            [(0,1), (0,2), (1,2), (1,1)],
-            # Void contours
-            [],
+            # Total mask
+            [
+                [False, True],
+            ],
             # Sub-blobs
             [],
         ),
@@ -120,17 +134,19 @@ def test_get_blobs_one_with_void():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(0,0), (0,1), (0,2), (0,3), (1,3), (2,3), (3,3), (3,2), (3,1), (3,0), (2,0), (1,0)],
             # Blob mask
             [
                 [True,  True,  True],
                 [True,  False, True],
                 [True,  True,  True],
             ],
-            # Outer contour
-            [(0,0), (0,1), (0,2), (0,3), (1,3), (2,3), (3,3), (3,2), (3,1), (3,0), (2,0), (1,0)],
-            # Void contours
+            # Total mask
             [
-                [(1,1), (1,2), (2,2), (2,1)],
+                [True,  True,  True],
+                [True,  True,  True],
+                [True,  True,  True],
             ],
             # Sub-blobs
             [],
@@ -151,18 +167,19 @@ def test_get_blobs_one_with_two_voids():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (1,5), (2,5), (3,5), (3,4), (3,3), (3,2), (3,1), (3,0), (2,0), (1,0)],
             # Blob mask
             [
                 [True,  True,  True,  True,  True],
                 [True,  False, True,  False, True],
                 [True,  True,  True,  True,  True],
             ],
-            # Outer contour
-            [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (1,5), (2,5), (3,5), (3,4), (3,3), (3,2), (3,1), (3,0), (2,0), (1,0)],
-            # Void contours
+            # Total mask
             [
-                [(1,1), (1,2), (2,2), (2,1)],
-                [(1,3), (1,4), (2,4), (2,3)],
+                [True,  True,  True,  True,  True],
+                [True,  True,  True,  True,  True],
+                [True,  True,  True,  True,  True],
             ],
             # Sub-blobs
             [],
@@ -183,31 +200,37 @@ def test_get_blobs_nested():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(0,0), (0,1), (0,2), (0,3), (1,3), (2,3), (3,3), (3,2), (3,1), (3,0), (2,0), (1,0)],
             # Blob mask
             [
                 [True,  True,  True],
                 [True,  False, True],
                 [True,  True,  True],
             ],
-            # Outer contour
-            [(0,0), (0,1), (0,2), (0,3), (1,3), (2,3), (3,3), (3,2), (3,1), (3,0), (2,0), (1,0)],
-            # Void contours
+            # Total mask
             [
-                [(1,1), (1,2), (2,2), (2,1)],
+                [True,  True,  True],
+                [True,  True,  True],
+                [True,  True,  True],
             ],
             # Sub-blobs
             [
                 BlobTuple(
+                    # Outer contour
+                    [(1,1), (1,2), (2,2), (2,1)],
                     # Blob mask
                     [
                         [False, False, False],
                         [False, True,  False],
                         [False, False, False],
                     ],
-                    # Outer contour
-                    [(1,1), (1,2), (2,2), (2,1)],
-                    # Void contours
-                    [],
+                    # Total mask
+                    [
+                        [False, False, False],
+                        [False, True,  False],
+                        [False, False, False],
+                    ],
                     # Sub-blobs
                     [],
                 ),
@@ -232,6 +255,8 @@ def test_get_blobs_nested_with_void_buffer():
     recv_blobs = get_blobs(test_pixel_grid)
     expected_blobs = [
         BlobTuple(
+            # Outer contour
+            [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (1,5), (2,5), (3,5), (4,5), (5,5), (5,4), (5,3), (5,2), (5,1), (5,0), (4,0), (3,0), (2,0), (1,0)],
             # Blob mask
             [
                 [True,  True,  True,  True,  True],
@@ -240,15 +265,19 @@ def test_get_blobs_nested_with_void_buffer():
                 [True,  False, False, False, True],
                 [True,  True,  True,  True,  True],
             ],
-            # Outer contour
-            [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (1,5), (2,5), (3,5), (4,5), (5,5), (5,4), (5,3), (5,2), (5,1), (5,0), (4,0), (3,0), (2,0), (1,0)],
-            # Void contours
+            # Total mask
             [
-                [(1,1), (1,2), (1,3), (1,4), (2,4), (3,4), (4,4), (4,3), (4,2), (4,1), (3,1), (2,1)],
+                [True,  True,  True,  True,  True],
+                [True,  True,  True,  True,  True],
+                [True,  True,  True,  True,  True],
+                [True,  True,  True,  True,  True],
+                [True,  True,  True,  True,  True],
             ],
             # Sub-blobs
             [
                 BlobTuple(
+                    # Outer contour
+                    [(2,2), (2,3), (3,3), (3,2)],
                     # Blob mask
                     [
                         [False, False, False, False, False],
@@ -257,10 +286,14 @@ def test_get_blobs_nested_with_void_buffer():
                         [False, False, False, False, False],
                         [False, False, False, False, False],
                     ],
-                    # Outer contour
-                    [(2,2), (2,3), (3,3), (3,2)],
-                    # Void contours
-                    [],
+                    # Total mask
+                    [
+                        [False, False, False, False, False],
+                        [False, False, False, False, False],
+                        [False, False, True,  False, False],
+                        [False, False, False, False, False],
+                        [False, False, False, False, False],
+                    ],
                     # Sub-blobs
                     [],
                 ),

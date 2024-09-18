@@ -1,5 +1,5 @@
 
-from src.blob_extraction import get_all_mask_contours
+from src.topography import get_all_mask_contours
 from copy import deepcopy
 
 

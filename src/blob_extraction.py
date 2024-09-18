@@ -2,8 +2,11 @@
 from enum import Enum
 from collections import namedtuple
 
+from src.utils import check_grid_element_safe
+from src.utils import grid_mask_subtraction
 
-BlobTuple = namedtuple("Blob", ["mask", "outer_contour", "void_contours", "sub_blobs"])
+
+BlobTuple = namedtuple("Blob", ["outer_contour", "mask", "total_mask", "sub_blobs"])
 
 class MoveDir(Enum):
     NORTH = 0,
@@ -46,14 +49,6 @@ def move_direction(current_pos, dir):
         return (current_pos[0], current_pos[1] -1 )
 
 
-def check_pixel(pixel_grid, r, c):
-    if r < 0 or r >= len(pixel_grid):
-        return 0
-    if c < 0 or c >= len(pixel_grid[r]):
-        return 0
-    return pixel_grid[r][c]
-
-
 def check_blob_mask_pixel(blob_mask, r, c):
     if r < 0 or r >= len(blob_mask):
         return False
@@ -84,7 +79,7 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
         if blob_mask[r][c]:
             continue
         # check if pixel should be included
-        if check_pixel(pixel_grid, r, c) != blob_color_index:
+        if check_grid_element_safe(pixel_grid, r, c) != blob_color_index:
             continue
         # expand pixel
         pixel_stack.append((r + 1, c))
@@ -94,18 +89,6 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
         blob_mask[r][c] = True
     
     return blob_mask
-
-
-def grid_mask_to_str(grid_mask):
-    buf = ""
-    buf += "+" + "-" * len(grid_mask[0]) + "+\n"
-    for row in grid_mask:
-        buf += "|"
-        for cell in row:
-            buf += "#" if cell else " "
-        buf += "|\n"
-    buf += "+" + "-" * len(grid_mask[0]) + "+\n"
-    return buf
 
 
 def get_total_blob_mask(contour, num_rows, num_cols):
@@ -149,7 +132,7 @@ def get_total_blob_mask(contour, num_rows, num_cols):
     return total_blob_mask
 
 
-def get_blob_outer_contour(blob_mask, r, c):
+def get_blob_mask_outer_contour(blob_mask, r, c):
     contour = []
     contour.append((r, c))
     
@@ -173,41 +156,12 @@ def get_blob_outer_contour(blob_mask, r, c):
     return contour
 
 
-def get_all_mask_contours(grid_mask):
-    """
-    Gets all the contours of a grid mask with positive "blobs".
-    This can be used for getting the contours of a void within a blob
-    There can be no nested mask contours
-    """
-    contours = []
-    
-    for r, row in enumerate(grid_mask):
-        for c, cell in enumerate(row):
-            if not grid_mask[r][c]:
-                continue
-            grid_blob_mask = get_flood_fill_blob_mask(grid_mask, r, c)
-            grid_blob_contour = get_blob_outer_contour(grid_blob_mask, r, c)
-            grid_mask = grid_mask_subtraction(grid_mask, grid_blob_mask)
-            contours.append(grid_blob_contour)
-    
-    return contours
-
-
-def grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
-    if len(grid_mask) != len(grid_mask_subtrahend):
-        raise Exception("Can not subtract different sized masks")
-    if len(grid_mask[0]) != len(grid_mask_subtrahend[0]):
-        raise Exception("Can not subtract different sized masks")
-        
-    return [[(grid_mask[r][c] and not grid_mask_subtrahend[r][c]) for c in range(len(grid_mask[r]))] for r in range(len(grid_mask))]
-
-
 def get_blobs(pixel_grid, grid_mask=None):
     """
     Arguments:
         pixel_grid (2d list[int]): A grid of integers representing the color group of each pixel
     
-    Returns (list(list(int, int))):
+    Returns (list(BlobTuple)):
         A list of bound loops for each destinct color group blob
     """
     # No grid mask means the whole pixel grid is usable
@@ -223,15 +177,14 @@ def get_blobs(pixel_grid, grid_mask=None):
             if pixel == 0:
                 continue
             blob_mask = get_flood_fill_blob_mask(pixel_grid, r, c)
-            blob_outer_contour = get_blob_outer_contour(blob_mask, r, c)
+            blob_outer_contour = get_blob_mask_outer_contour(blob_mask, r, c)
             total_blob_mask = get_total_blob_mask(blob_outer_contour, len(pixel_grid), len(pixel_grid[0]))
             # subtract the total blob mas from the current mask
             # we do not want to count this blob again and sub blobs will be found with the recursive call
             grid_mask = grid_mask_subtraction(grid_mask, total_blob_mask)
             sub_blob_mask = grid_mask_subtraction(total_blob_mask, blob_mask)
-            void_contours = get_all_mask_contours(sub_blob_mask)
             sub_blobs = get_blobs(pixel_grid, grid_mask=sub_blob_mask)
-            blob = BlobTuple(blob_mask, blob_outer_contour, void_contours, sub_blobs)
+            blob = BlobTuple(blob_outer_contour, blob_mask, total_blob_mask, sub_blobs)
             blobs.append(blob)
     
     return blobs
