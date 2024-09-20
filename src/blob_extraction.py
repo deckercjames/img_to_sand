@@ -4,9 +4,12 @@ from collections import namedtuple
 
 from src.utils import check_grid_element_safe
 from src.utils import grid_mask_subtraction
+from src.utils import get_list_element_cyclic
+
+from src.tree import TreeNode
 
 
-BlobTuple = namedtuple("Blob", ["outer_contour", "mask", "total_mask", "sub_blobs"])
+Blob = namedtuple("Blob", ["outer_contour", "mask", "total_mask"])
 
 class MoveDir(Enum):
     NORTH = 0,
@@ -55,10 +58,6 @@ def check_blob_mask_pixel(blob_mask, r, c):
     if c < 0 or c >= len(blob_mask[r]):
         return False
     return blob_mask[r][c]
-
-
-def get_list_element_cyclic(list, i):
-    return list[i % len(list)]
 
 
 def get_flood_fill_blob_mask(pixel_grid, r, c):
@@ -156,7 +155,7 @@ def get_blob_mask_outer_contour(blob_mask, r, c):
     return contour
 
 
-def get_blobs(pixel_grid, grid_mask=None):
+def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
     """
     Arguments:
         pixel_grid (2d list[int]): A grid of integers representing the color group of each pixel
@@ -168,7 +167,7 @@ def get_blobs(pixel_grid, grid_mask=None):
     if grid_mask is None:
         grid_mask = [[True for _ in range(len(row))] for row in pixel_grid]
     
-    blobs = []
+    blob_tree_nodes = []
 
     for r, row in enumerate(pixel_grid):
         for c, pixel in enumerate(row):
@@ -183,9 +182,10 @@ def get_blobs(pixel_grid, grid_mask=None):
             # we do not want to count this blob again and sub blobs will be found with the recursive call
             grid_mask = grid_mask_subtraction(grid_mask, total_blob_mask)
             sub_blob_mask = grid_mask_subtraction(total_blob_mask, blob_mask)
-            sub_blobs = get_blobs(pixel_grid, grid_mask=sub_blob_mask)
-            blob = BlobTuple(blob_outer_contour, blob_mask, total_blob_mask, sub_blobs)
-            blobs.append(blob)
+            sub_blob_tree_nodes = get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=sub_blob_mask)
+            blob = Blob(blob_outer_contour, blob_mask, total_blob_mask)
+            blob_tree_node = TreeNode(blob, sub_blob_tree_nodes)
+            blob_tree_nodes.append(blob_tree_node)
     
-    return blobs
+    return blob_tree_nodes
 
