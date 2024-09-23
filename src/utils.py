@@ -6,11 +6,11 @@ def get_list_element_cyclic(list, i):
     return list[i % len(list)]
 
 
-def check_grid_element_safe(grid, r, c):
+def check_grid_element_safe(grid, r, c, default=None):
     if r < 0 or r >= len(grid):
-        return None
+        return default
     if c < 0 or c >= len(grid[r]):
-        return None
+        return default
     return grid[r][c]
 
 

@@ -5,14 +5,14 @@ from src.utils import check_grid_element_safe
 def _get_neighbours(image, r, c):
     '''Return 8-neighbours of point p1 of picture, in order'''
     return [
-        check_grid_element_safe(image, r-1, c  ),
-        check_grid_element_safe(image, r-1, c+1),
-        check_grid_element_safe(image, r,   c+1),
-        check_grid_element_safe(image, r+1, c+1),
-        check_grid_element_safe(image, r+1, c  ),
-        check_grid_element_safe(image, r+1, c-1),
-        check_grid_element_safe(image, r,   c-1),
-        check_grid_element_safe(image, r-1, c-1),
+        check_grid_element_safe(image, r-1, c,   default=False),
+        check_grid_element_safe(image, r-1, c+1, default=False),
+        check_grid_element_safe(image, r,   c+1, default=False),
+        check_grid_element_safe(image, r+1, c+1, default=False),
+        check_grid_element_safe(image, r+1, c,   default=False),
+        check_grid_element_safe(image, r+1, c-1, default=False),
+        check_grid_element_safe(image, r,   c-1, default=False),
+        check_grid_element_safe(image, r-1, c-1, default=False),
     ]
 
 def _get_transition_count(neighbours):
