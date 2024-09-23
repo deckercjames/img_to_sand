@@ -2,7 +2,7 @@
 from copy import deepcopy
 from src.utils import check_grid_element_safe
 
-def get_neighbours(image, r, c):
+def _get_neighbours(image, r, c):
     '''Return 8-neighbours of point p1 of picture, in order'''
     return [
         check_grid_element_safe(image, r-1, c  ),
@@ -15,38 +15,32 @@ def get_neighbours(image, r, c):
         check_grid_element_safe(image, r-1, c-1),
     ]
 
-def get_transition_count(neighbours):
+def _get_transition_count(neighbours):
     n = neighbours + neighbours[0:1]    # P2, ... P9, P2
     return sum((n1, n2) == (False, True) for n1, n2 in zip(n, n[1:]))
 
-def zhang_suen_errosion_itteration(image):
+
+def _zhang_suen_errosion_single_step(image, neighbor_indicies_set_1, neighbor_indicies_set_2):
     # Step 1
-    changing1 = []
+    changing = []
     for r in range(len(image)):
         for c in range(len(image[r])):
-            P2,P3,P4,P5,P6,P7,P8,P9 = neighbours = get_neighbours(image, r, c)
-            if (image[r][c] and    # (Condition 0)
-                (not P4 or not P6 or not P8) and   # Condition 4
-                (not P2 or not P4 or not P6) and   # Condition 3
-                get_transition_count(neighbours) == 1 and # Condition 2
-                2 <= sum([1 if n else 0 for n in neighbours]) <= 6):      # Condition 1
-                changing1.append((r,c))
-    for r, c in changing1:
+            neighbours = _get_neighbours(image, r, c)
+            if (image[r][c] and
+                    (any([not neighbours[i-2] for i in neighbor_indicies_set_1])) and   # Neighbors are indexed starting with P2
+                    (any([not neighbours[i-2] for i in neighbor_indicies_set_2])) and
+                    _get_transition_count(neighbours) == 1 and
+                    2 <= sum([1 if n else 0 for n in neighbours]) <= 6):
+                changing.append((r,c))
+    for r, c in changing:
         image[r][c] = False
-    # Step 2
-    changing2 = []
-    for r in range(len(image)):
-        for c in range(len(image[r])):
-            P2,P3,P4,P5,P6,P7,P8,P9 = neighbours = get_neighbours(image, r, c)
-            if (image[r][c] and    # (Condition 0)
-                (not P2 or not P6 or not P8) and   # Condition 4
-                (not P2 or not P4 or not P8) and   # Condition 3
-                get_transition_count(neighbours) == 1 and # Condition 2
-                2 <= sum([1 if n else 0 for n in neighbours]) <= 6):      # Condition 1
-                changing2.append((r,c))
-    for r, c in changing2:
-        image[r][c] = False
-    return len(changing1) > 0 or len(changing2) > 0
+    return len(changing)
+
+
+def zhang_suen_errosion_itteration(image):
+    changed_step_1 = _zhang_suen_errosion_single_step(image, (4,6,8), (2,4,6))
+    changed_step_2 = _zhang_suen_errosion_single_step(image, (2,6,8), (2,4,8))
+    return changed_step_1 or changed_step_2
 
 
 def zhang_suen_errosion(grid_mask):

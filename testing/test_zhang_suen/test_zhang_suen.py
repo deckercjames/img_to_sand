@@ -1,5 +1,6 @@
 
 from src.zhang_suen import zhang_suen_errosion
+from src.zhang_suen import zhang_suen_errosion_itteration
 
 def helper_mask_string_to_bool_mask(str_rep):
     result = []
@@ -39,6 +40,27 @@ def test_zhang_suen_basic():
     test_mask = helper_mask_string_to_bool_mask(test_mask_str)
     result = zhang_suen_errosion(test_mask)
     result_str = helper_grid_mask_to_string(result)
+    exp_result = \
+        "                                                           \n" \
+        "                                                           \n" \
+        "    # ##########                       #######             \n" \
+        "     ##        #                   ####       #            \n" \
+        "     #          #                 ##                       \n" \
+        "     #          #                #                         \n" \
+        "     #          #                #                         \n" \
+        "     #          #                #                         \n" \
+        "     ############               #                          \n" \
+        "     #          #               #                          \n" \
+        "     #          #                #                         \n" \
+        "     #          #                #                         \n" \
+        "     #          #                #                         \n" \
+        "     #                            ##                       \n" \
+        "     #                             ############            \n" \
+        "                       ###                          ###    \n" \
+        "                                                           \n" \
+        "                                                           \n"
+    print("Expected")
+    print(exp_result)
+    print("RECEIVED")
     print(result_str)
-    exp_result = 0
-    assert result == exp_result
+    assert result_str == exp_result
