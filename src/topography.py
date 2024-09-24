@@ -2,6 +2,7 @@
 from src.utils import check_grid_element_safe
 from src.blob_extraction import get_blob_mask_outer_contour
 from src.blob_extraction import get_total_blob_mask
+from src.zhang_suen import zhang_suen_errosion_itteration
 from src.blob_extraction import Blob
 from src.utils import grid_mask_subtraction
 from src.utils import grid_mask_union
@@ -11,6 +12,9 @@ from src.utils import get_list_element_cyclic
 from copy import deepcopy
 from collections import namedtuple
 from src.tree import TreeNode
+
+
+LINE_WIDTH_PATH_FACTOR = 4
 
 
 def _apply_topography_tree_node_to_visual_rep(node, hor_fences, vert_fences):
@@ -235,6 +239,18 @@ def get_blob_topography(blob):
     decant_mask_data_from_topography_tree(root_node)
     
     return root_node
+
+
+def get_blob_topography_breakdown(blob, path_width):
+    
+    # Run Zhang Suen to isolate lines
+    zhang_suen_erroded_grid_mask = deepcopy(blob.mask)
+    for _ in range(path_width * LINE_WIDTH_PATH_FACTOR):
+        zhang_suen_errosion_itteration(zhang_suen_erroded_grid_mask)
+    
+    # find all remainging blobs
+    remaining_blobs_grid_mask = get_remaining_blobs_after_zhang_suen_partial_errosion(zhang_suen_erroded_grid_mask)
+    
 
 
 def get_topography(blobs):

@@ -55,8 +55,4 @@ def test_zhang_suen_basic():
         "    #                             ############          \n" \
         "                      ###                          ###  \n" \
         "                                                        \n"
-    print("Expected")
-    print(exp_result)
-    print("RECEIVED")
-    print(result_str)
     assert result_str == exp_result
