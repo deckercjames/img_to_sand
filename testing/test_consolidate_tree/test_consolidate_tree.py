@@ -21,7 +21,7 @@ def test_consol_tree_basic():
                     [False, True ],
                     [False, False],
                 ],
-                # Total mask (unused for the tested funciton)
+                # Total mask (unused for the tested function)
                 None
             ),
             # Sub-blobs
@@ -36,7 +36,7 @@ def test_consol_tree_basic():
                     [False, False],
                     [True,  False],
                 ],
-                # Total mask (unused for the tested funciton)
+                # Total mask (unused for the tested function)
                 None
             ),
             # Sub-blobs
@@ -60,7 +60,7 @@ def test_consol_tree_basic():
                         [False, True ],
                         [False, False],
                     ],
-                    # Total mask (unused for the tested funciton)
+                    # Total mask (unused for the tested function)
                     None
                 ),
                 Blob(
@@ -71,7 +71,7 @@ def test_consol_tree_basic():
                         [False, False],
                         [True,  False],
                     ],
-                    # Total mask (unused for the tested funciton)
+                    # Total mask (unused for the tested function)
                     None
                 ),
             ]
