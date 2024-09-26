@@ -22,6 +22,8 @@ def grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
         
     return [[(grid_mask[r][c] and not grid_mask_subtrahend[r][c]) for c in range(len(grid_mask[r]))] for r in range(len(grid_mask))]
 
+def get_all_false_mask(num_rows, num_cols):
+    return [[False for _ in range(num_cols)] for _ in range(num_rows)]
 
 def grid_mask_union(m1, m2):
     if len(m1) != len(m2):

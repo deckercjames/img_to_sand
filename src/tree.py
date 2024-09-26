@@ -21,4 +21,15 @@ class TreeNode:
         print("    "*indent + str(self.node_data))
         for child in self.children:
             child.print_tree(indent+1)
-        
+
+
+def unwrap_tree_post_order_traversal(root):
+    
+    linear_buf = []
+    
+    for child in root.children:
+        linear_buf.extend(unwrap_tree_post_order_traversal(child))
+    
+    linear_buf.append(root.node_data)
+    
+    return linear_buf

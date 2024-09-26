@@ -240,18 +240,3 @@ def get_blob_topography(blob):
     
     return root_node
 
-
-def get_blob_topography_breakdown(blob, path_width):
-    
-    # Run Zhang Suen to isolate lines
-    zhang_suen_erroded_grid_mask = deepcopy(blob.mask)
-    for _ in range(path_width * LINE_WIDTH_PATH_FACTOR):
-        zhang_suen_errosion_itteration(zhang_suen_erroded_grid_mask)
-    
-    # find all remainging blobs
-    remaining_blobs_grid_mask = get_remaining_blobs_after_zhang_suen_partial_errosion(zhang_suen_erroded_grid_mask)
-    
-
-
-def get_topography(blobs):
-    pass
