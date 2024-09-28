@@ -15,6 +15,10 @@ class LinkableEntity(ABC):
     @abstractmethod
     def get_exit_points(self):
         pass
+        
+    @abstractmethod
+    def get_entity_grid_mask(self):
+        pass
 
 
 class LinkableEntityLine(LinkableEntity):

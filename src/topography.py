@@ -4,8 +4,8 @@ from src.blob_extraction import get_blob_mask_outer_contour
 from src.blob_extraction import get_total_blob_mask
 from src.zhang_suen import zhang_suen_errosion_itteration
 from src.blob_extraction import Blob
-from src.utils import grid_mask_subtraction
-from src.utils import grid_mask_union
+from src.utils import get_grid_mask_subtraction
+from src.utils import get_grid_mask_union
 from src.utils import grid_mask_to_str
 from src.utils import check_mask_intersection
 from src.utils import get_list_element_cyclic
@@ -112,7 +112,7 @@ def get_all_blobs_from_mask(grid_mask):
             grid_blob_contour = get_blob_mask_outer_contour(grid_blob_mask, r, c)
             grid_blob_total_mask = get_total_blob_mask(grid_blob_contour, num_rows, num_cols)
             blob = Blob(grid_blob_contour, grid_blob_mask, grid_blob_total_mask)
-            grid_mask = grid_mask_subtraction(grid_mask, grid_blob_mask)
+            grid_mask = get_grid_mask_subtraction(grid_mask, grid_blob_mask)
             blobs.append(blob)
     
     return blobs
@@ -150,7 +150,7 @@ def get_blob_topography(blob):
         root_node
     ]
     
-    root_voids_mask = grid_mask_subtraction(blob.total_mask, blob.mask)
+    root_voids_mask = get_grid_mask_subtraction(blob.total_mask, blob.mask)
     negative_branches = [TreeNode(b, []) for b in get_all_blobs_from_mask(root_voids_mask)]
     
     
@@ -170,9 +170,9 @@ def get_blob_topography(blob):
         # invert mask
         void_mask = [[False for _ in range(len(row))] for row in main_mask]
         for positive_blob in positive_blobs:
-            void_mask = grid_mask_union(void_mask, positive_blob.total_mask)
+            void_mask = get_grid_mask_union(void_mask, positive_blob.total_mask)
         for positive_blob in positive_blobs:
-            void_mask = grid_mask_subtraction(void_mask, positive_blob.mask)
+            void_mask = get_grid_mask_subtraction(void_mask, positive_blob.mask)
         print("Current main void mask")
         print(grid_mask_to_str(void_mask))
         
