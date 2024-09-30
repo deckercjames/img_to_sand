@@ -16,8 +16,8 @@ def check_grid_element_safe(grid, r, c, default=None):
 
 def get_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
     if len(grid_mask) != len(grid_mask_subtrahend) or len(grid_mask[0]) != len(grid_mask_subtrahend[0]):
-        raise Exception("Can not subtract different sized masks. ({}x{}) - ({},{})".format(len(grid_mask), len(grid_mask[0]), len(grid_mask_subtrahend), len(grid_mask_subtrahend[0])))
-        
+        raise Exception("Can not subtract different sized masks. ({}x{}) - ({}x{})".format(len(grid_mask), len(grid_mask[0]), len(grid_mask_subtrahend), len(grid_mask_subtrahend[0])))
+
     return [[(grid_mask[r][c] and not grid_mask_subtrahend[r][c]) for c in range(len(grid_mask[r]))] for r in range(len(grid_mask))]
 
 
@@ -26,11 +26,9 @@ def get_all_false_mask(num_rows, num_cols):
 
 
 def get_grid_mask_union(m1, m2):
-    if len(m1) != len(m2):
-        raise Exception("Can not subtract different sized masks")
-    if len(m1[0]) != len(m2[0]):
-        raise Exception("Can not subtract different sized masks")
-        
+    if len(m1) != len(m2) or len(m1[0]) != len(m2[0]):
+        raise Exception("Can not union different sized masks. ({}x{}) U ({}x{})".format(len(m1), len(m1[0]), len(m2), len(m2[0])))
+
     return [[(m1[r][c] or m2[r][c]) for c in range(len(m1[r]))] for r in range(len(m1))]
 
 

@@ -3,6 +3,7 @@ from src.linker.linker import get_child_states
 from src.linker.linker import LinkerProblem
 from src.linker.linker import CostMenu
 from src.linker.linker import LinkerSearchState
+from src.linker.linker import EntityReference
 from src.utils import get_all_false_mask
 from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
 from src.consolidate_tree import consolidate_blob_trees
@@ -31,7 +32,7 @@ def helper_get_layers(pixel_grid_str):
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
 
-    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
+    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
     
     
 
@@ -54,7 +55,7 @@ def test_get_child_states_from_beginning():
             [False, True,  True,  True,  False]
         ],
         num_rows=5,
-        num_cols=6,
+        num_cols=18,
         cost_menu=CostMenu(
             visited_mask_cost=100000,
             future_mask_cost=0,
@@ -62,7 +63,7 @@ def test_get_child_states_from_beginning():
         )
     )
     test_state = LinkerSearchState(
-        cur_entity_ref=None, # Start at border
+        cur_entity_ref=EntityReference(0, None), # Start at border
         visited_mask=get_all_false_mask(test_problem.num_rows, test_problem.num_cols),
         visited_layer_entity_idx_set=set(),
         cost_to_state=0,

@@ -51,7 +51,7 @@ def get_equally_spaced_gateway_points(line_grid_mask, spacing):
     fringe = deque()
     fringe.append(None)
     fringe.append(_get_point_on_mask(line_grid_mask))
-    # Use a None marker to represent one full pass througthh the queue
+    # Use a None marker to represent one full pass througth the queue
     # Every 'spacing' passes through the queue, add the entire fringe to the list
     
     visited = set()
@@ -86,5 +86,7 @@ def get_equally_spaced_gateway_points(line_grid_mask, spacing):
 def get_line_linkable_entity(line_grid_mask: List[List[bool]], spacing):
     gateway_points = get_line_end_points(line_grid_mask)
     if len(gateway_points) == 0:
+        if spacing <= 0:
+            raise Exception("Spacing must be a positive integer!")
         gateway_points = get_equally_spaced_gateway_points(line_grid_mask, spacing)
     return LinkableEntityLine(line_grid_mask, gateway_points)

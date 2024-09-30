@@ -146,11 +146,7 @@ def get_entity_link_with_border(problem: LinkerProblem, connection_points: List[
         if best_idx is None or cost < best_cost:
             best_cost = cost
             best_idx = i
-    
-    for p in possible_ret_values:
-        print(p)
-    print("best idx"+str(best_idx))
-    
+
     return (possible_ret_values[best_idx][1], possible_ret_values[best_idx][2])
 
 
@@ -165,8 +161,8 @@ def get_entity_link(problem: LinkerProblem, e0_ref: EntityReference, e1_ref: Ent
     best_from_pt = None
     best_to_pt = None
     
-    e0 = problem.layers[e0_ref.layer_idx].linkable_entities[e0_ref.entity_idx] if e0_ref is not None else None
-    e1 = problem.layers[e1_ref.layer_idx].linkable_entities[e1_ref.entity_idx] if e1_ref is not None else None
+    e0 = problem.layers[e0_ref.layer_idx][e0_ref.entity_idx] if e0_ref.entity_idx is not None else None
+    e1 = problem.layers[e1_ref.layer_idx][e1_ref.entity_idx] if e1_ref.entity_idx is not None else None
     
     # Connect entity to border
     if e1 is None:
@@ -195,7 +191,7 @@ def get_entity_link(problem: LinkerProblem, e0_ref: EntityReference, e1_ref: Ent
 
 def is_goal_state(problem: LinkerProblem, search_state) -> bool:
     cur_entity_ref = search_state.cur_entity_ref
-    return cur_entity_ref.layer_idx == len(problem.layers) - 1 and cur_entity_ref.entity_idx == len(problem.layers.linkable_entities) - 1
+    return cur_entity_ref.layer_idx == len(problem.layers) - 1 and cur_entity_ref.entity_idx == len(problem.layers[cur_entity_ref.layer_idx]) - 1
 
 
 def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState) -> List[LinkerSearchState]:
@@ -204,7 +200,7 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState) -
     next_visited_layer_entity_idx_set = current_state.visited_layer_entity_idx_set
     
     # Check if this layer is complete
-    if len(current_state.visited_layer_entity_idx_set) == len(problem.layers[current_state.cur_entity_ref.layer_idx].linkable_entities):
+    if len(current_state.visited_layer_entity_idx_set) == len(problem.layers[current_state.cur_entity_ref.layer_idx]):
         # Move to next layer
         next_layer_idx += 1
         next_visited_layer_entity_idx_set = set()
@@ -212,7 +208,9 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState) -
     child_states = []
         
     # For every unvisited entity in the next layer (next layer could be the current layer)
-    for linkable_entity_idx, linkable_entity in enumerate(problem.layers[next_layer_idx].linkable_entities):
+    for linkable_entity_idx, linkable_entity in enumerate(problem.layers[next_layer_idx]):
+        linkable_entity_ref = EntityReference(next_layer_idx, linkable_entity_idx)
+        print("ITTERATION "+str(linkable_entity_idx))
         # If visited, ignore
         if linkable_entity_idx in current_state.visited_layer_entity_idx_set:
             continue
@@ -222,8 +220,9 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState) -
         child_visited_layer_entity_idx_set = next_visited_layer_entity_idx_set.copy()
         child_visited_layer_entity_idx_set.add(linkable_entity_idx)
         # Get the path item and the cost
-        from_pt, to_pt = get_entity_link(problem, current_state.cur_entity_ref, linkable_entity)
-        link_cost = calculate_cost(problem, from_pt, to_pt)
+        print("Current entity ref "+str(current_state.cur_entity_ref))
+        from_pt, to_pt = get_entity_link(problem, current_state.cur_entity_ref, linkable_entity_ref)
+        link_cost = calculate_cost(problem, current_state, from_pt, to_pt)
         # Child Path
         child_path = current_state.path.copy()
         child_path.append(PathItem(from_pt, child_entity_ref, to_pt))
@@ -238,8 +237,9 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState) -
         child_states.append(child_state)
     
     # Special Case if the current state is not on the border, add a link to the boarder
-    if current_state.cur_entity_ref is not None:
-        from_pt, to_pt = get_entity_link(problem, current_state.cur_entity_ref, None)
+    print("SPECIAL CASE WITH BORDER")
+    if current_state.cur_entity_ref.entity_idx is not None:
+        from_pt, to_pt = get_entity_link(problem, current_state.cur_entity_ref, EntityReference(next_layer_idx, None))
         link_cost = calculate_cost(problem, from_pt, to_pt)
         child_path.append(PathItem(from_pt, None, to_pt))
         child_state = LinkerSearchState(

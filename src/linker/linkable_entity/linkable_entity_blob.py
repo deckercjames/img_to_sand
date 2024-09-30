@@ -35,8 +35,10 @@ def get_leaf_entry_points(blob_topography: TreeNode, spacing: int):
 
 
 def get_blob_linkable_entity(blob: Blob, spacing: int):
+    if spacing <= 0:
+        raise Exception("Spacing must be a positive integer!")
     exit_points = blob.outer_contour[::spacing]
     blob_topograph = get_blob_topography(blob)
-    print(get_topography_tree_visual(blob_topograph, len(blob.mask), len(blob.mask[0])))
+    # print(get_topography_tree_visual(blob_topograph, len(blob.mask), len(blob.mask[0])))
     entry_points = get_leaf_entry_points(blob_topograph, spacing)
     return LinkableEntityBlob(blob, entry_points, exit_points)
