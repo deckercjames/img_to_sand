@@ -1,8 +1,4 @@
 
-from collections import namedtuple
-
-# TreeNode = namedtuple("TreeNode", ["node_data", "children"])
-
 class TreeNode:
     def __init__(self, node_data, children=[]):
         self.node_data = node_data

@@ -2,6 +2,7 @@
 from copy import deepcopy
 from src.utils import check_grid_element_safe
 from src.utils import get_grid_mask_subtraction
+from src.utils import get_mask_with_inward_bleed
 
 #==================================================
 # Main Zhang Suen Algorithm
@@ -97,7 +98,7 @@ def get_split_lines_and_blobs(blob_grid_mask, itterations):
     
     erroded_grid_mask = deepcopy(blob_grid_mask)
     
-    for i in range(itterations):
+    for _ in range(itterations):
         zhang_suen_errosion_itteration(erroded_grid_mask)
     
     micro_blob_grid_mask = get_area_blobs(erroded_grid_mask)

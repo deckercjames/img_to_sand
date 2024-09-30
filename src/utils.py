@@ -1,5 +1,5 @@
 
-
+from copy import deepcopy
 
 
 def get_list_element_cyclic(list, i):
@@ -15,10 +15,8 @@ def check_grid_element_safe(grid, r, c, default=None):
 
 
 def get_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
-    if len(grid_mask) != len(grid_mask_subtrahend):
-        raise Exception("Can not subtract different sized masks")
-    if len(grid_mask[0]) != len(grid_mask_subtrahend[0]):
-        raise Exception("Can not subtract different sized masks")
+    if len(grid_mask) != len(grid_mask_subtrahend) or len(grid_mask[0]) != len(grid_mask_subtrahend[0]):
+        raise Exception("Can not subtract different sized masks. ({}x{}) - ({},{})".format(len(grid_mask), len(grid_mask[0]), len(grid_mask_subtrahend), len(grid_mask_subtrahend[0])))
         
     return [[(grid_mask[r][c] and not grid_mask_subtrahend[r][c]) for c in range(len(grid_mask[r]))] for r in range(len(grid_mask))]
 
@@ -60,3 +58,21 @@ def check_mask_intersection(m1, m2):
                 return True
     return False
     
+
+
+def get_mask_with_inward_bleed(grid_mask, diag_bleed=False):
+    result = deepcopy(grid_mask)
+    
+    for r, row in enumerate(grid_mask):
+        for c in range(len(row)):
+            if r == 0 or r == len(grid_mask) - 1 or c == 0 or c == len(row) - 1:
+                result[r][c] = False
+                continue
+            if not grid_mask[r-1][c] or not grid_mask[r+1][c] or not grid_mask[r][c-1] or not grid_mask[r][c+1]:
+                result[r][c] = False
+                continue
+            if diag_bleed and (not grid_mask[r-1][c+1] or not grid_mask[r+1][c+1] or not grid_mask[r+1][c-1] or not grid_mask[r-1][c-1]):
+                result[r][c] = False
+                continue
+            
+    return result

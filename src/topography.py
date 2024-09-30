@@ -9,12 +9,10 @@ from src.utils import get_grid_mask_union
 from src.utils import grid_mask_to_str
 from src.utils import check_mask_intersection
 from src.utils import get_list_element_cyclic
+from src.utils import get_mask_with_inward_bleed
 from copy import deepcopy
 from collections import namedtuple
 from src.tree import TreeNode
-
-
-LINE_WIDTH_PATH_FACTOR = 4
 
 
 def _apply_topography_tree_node_to_visual_rep(node, hor_fences, vert_fences):
@@ -118,31 +116,13 @@ def get_all_blobs_from_mask(grid_mask):
     return blobs
 
 
-def get_mask_with_inward_bleed(grid_mask, diag_bleed=False):
-    result = deepcopy(grid_mask)
-    
-    for r, row in enumerate(grid_mask):
-        for c in range(len(row)):
-            if r == 0 or r == len(grid_mask) - 1 or c == 0 or c == len(row) - 1:
-                result[r][c] = False
-                continue
-            if not grid_mask[r-1][c] or not grid_mask[r+1][c] or not grid_mask[r][c-1] or not grid_mask[r][c+1]:
-                result[r][c] = False
-                continue
-            if diag_bleed and (not grid_mask[r-1][c+1] or not grid_mask[r+1][c+1] or not grid_mask[r+1][c-1] or not grid_mask[r-1][c-1]):
-                result[r][c] = False
-                continue
-            
-    return result
-
-
 def decant_mask_data_from_topography_tree(tree_node):
     tree_node.node_data = tree_node.node_data.outer_contour
     for child in tree_node.children:
         decant_mask_data_from_topography_tree(child)
 
 
-def get_blob_topography(blob):
+def get_blob_topography(blob: Blob) -> TreeNode:
     
     # Get the void regions
     root_node = TreeNode(blob, [])
@@ -157,11 +137,11 @@ def get_blob_topography(blob):
     main_mask = blob.mask
     
     while True:
-        print("Num pos branches "+str(len(positive_branchs)))
-        print("Num neg branches "+str(len(negative_branches)))
+        # print("Num pos branches "+str(len(positive_branchs)))
+        # print("Num neg branches "+str(len(negative_branches)))
         main_mask = get_mask_with_inward_bleed(main_mask, diag_bleed=True)
-        print("Current main mask")
-        print(grid_mask_to_str(main_mask))
+        # print("Current main mask")
+        # print(grid_mask_to_str(main_mask))
         
         # grow tree in positive direction
         positive_blobs = get_all_blobs_from_mask(main_mask)
@@ -173,41 +153,41 @@ def get_blob_topography(blob):
             void_mask = get_grid_mask_union(void_mask, positive_blob.total_mask)
         for positive_blob in positive_blobs:
             void_mask = get_grid_mask_subtraction(void_mask, positive_blob.mask)
-        print("Current main void mask")
-        print(grid_mask_to_str(void_mask))
+        # print("Current main void mask")
+        # print(grid_mask_to_str(void_mask))
         
         # get all new void nodes
         negative_blobs = get_all_blobs_from_mask(void_mask)
         new_negative_nodes = [TreeNode(b, []) for b in negative_blobs]
-        print("num new neg void nodes "+str(len(new_negative_nodes)))
+        # print("num new neg void nodes "+str(len(new_negative_nodes)))
         
         # assign new negative nodes to negative branches
         for new_negative_node in new_negative_nodes:
-            print("Assigning neg branches to negative node")
-            print(grid_mask_to_str(new_negative_node.node_data.mask))
+            # print("Assigning neg branches to negative node")
+            # print(grid_mask_to_str(new_negative_node.node_data.mask))
             # check which negative branges it grows to (can be multiple)
             for i in range(len(negative_branches)-1, -1, -1):
-                print("Checking existing neg branch "+str(i))
-                print(grid_mask_to_str(negative_branches[i].node_data.mask))
+                # print("Checking existing neg branch "+str(i))
+                # print(grid_mask_to_str(negative_branches[i].node_data.mask))
                 if not check_mask_intersection(new_negative_node.node_data.mask, negative_branches[i].node_data.mask):
                     continue
-                print("Found match for branch "+str(i))
+                # print("Found match for branch "+str(i))
                 new_negative_node.children.append(negative_branches[i])
                 del negative_branches[i]
         
-        print("Num unasigned negative nodes "+str(len(negative_branches)))
+        # print("Num unasigned negative nodes "+str(len(negative_branches)))
         
         # any unassigned negative branches join with the positive ones
         for negative_branch in negative_branches:
-            print("Attempting to assign negative branch to positive branch")
-            print(grid_mask_to_str(negative_branch.node_data.mask))
+            # print("Attempting to assign negative branch to positive branch")
+            # print(grid_mask_to_str(negative_branch.node_data.mask))
             # Check which positive branch it matches to
             for positive_branch in positive_branchs:
-                print("Comparing to positive branch")
-                print(grid_mask_to_str(positive_branch.node_data.total_mask))
+                # print("Comparing to positive branch")
+                # print(grid_mask_to_str(positive_branch.node_data.total_mask))
                 if not check_mask_intersection(negative_branch.node_data.mask, positive_branch.node_data.total_mask):
                     continue
-                print("Match found!")
+                # print("Match found!")
                 positive_branch.children.append(negative_branch)
                 break
             else:
@@ -224,9 +204,6 @@ def get_blob_topography(blob):
         for positive_node in positive_nodes:
             # check which positive branch end this node belongs to
             for positive_branch in positive_branchs:
-                print("HERE")
-                print(type(positive_node))
-                print(type(positive_branch))
                 if not check_mask_intersection(positive_node.node_data.mask, positive_branch.node_data.mask):
                     continue
                 positive_branch.children.append(positive_node)
