@@ -34,6 +34,8 @@ class LinkerSearchState:
     visited_layer_entity_idx_set: Set[int]
     cost_to_state: float
     path: List[PathItem]
+    def __lt__(self, other):
+        return True
 """
 cur_entity_ref (EntityReference): contains the layer index, entity_index of the current entity. None means edge
 visited_mask (gridmask): The union of all masks of visited entities. This prevents us from making a link that

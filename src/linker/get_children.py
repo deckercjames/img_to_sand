@@ -9,6 +9,7 @@ from copy import deepcopy
 from src.linker.linkable_entity.linkable_entity import EntityReference
 import sys
 from src.linker.linker_problem import *
+import time
 
 from dataclasses import dataclass
 
@@ -109,9 +110,9 @@ def get_border_heuristic(problem: GetChildrenProblem, state: GetChildrenSearchSt
 
 def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: bool=False):
     
-    print("HERE")
-    print("border_is_goal "+str(border_is_goal))
-    print(problem.start_entity_ref)
+    # print("HERE")
+    # print("border_is_goal "+str(border_is_goal))
+    # print(problem.start_entity_ref)
     start_points = set()
     if problem.start_entity_ref.entity_idx is None: # Start on the boarder
         for r in range(problem.get_num_rows() + 1):
@@ -134,7 +135,7 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
             path=[start_point],
             cost=0
         )
-        print(border_is_goal)
+        # print(border_is_goal)
         # h = get_heuristic(problem, start_state)
         h = get_border_heuristic(problem, start_state) if border_is_goal else get_heuristic(problem, start_state)
         heapq.heappush(fringe, (h, start_state))
@@ -142,10 +143,10 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
 
     while len(fringe) > 0:
         
-        _print_fringe(problem, fringe)
-        # assert False
-        
         _, cur_state = heapq.heappop(fringe)
+        
+        if cur_state.position in visited:
+            continue
         
         # check if this is a goal state
         if border_is_goal:
@@ -163,7 +164,7 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
         r, c = cur_state.position
         for nr, nc in get_neighbor_points(r, c):
             # Check on board
-            if nr < 0 or nr > len(problem.cost_map) or nc < 0 or nc > len(problem.cost_map[0]):
+            if nr < 0 or nr >= len(problem.cost_map) or nc < 0 or nc >= len(problem.cost_map[0]):
                 continue
             # Check visited
             if (nr, nc) in visited:
@@ -180,7 +181,7 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
                 path=new_path,
                 cost=new_cost
             )
-            print(border_is_goal)
+            # print(border_is_goal)
             # heuristic = get_heuristic(problem, child)
             heuristic = get_border_heuristic(problem, start_state) if border_is_goal else get_heuristic(problem, child)
             heapq.heappush(fringe, (new_cost + heuristic, child))
@@ -190,6 +191,11 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
 
 def _get_search_entity_refs(problem: LinkerProblem, current_state: LinkerSearchState):
     
+    # print("CurrentState {")
+    # print("  current_entity_ref: {}".format(str(current_state.cur_entity_ref)))
+    # print("  visited_layer_entity_idx_set: {}".format(str(current_state.visited_layer_entity_idx_set)))
+    # print("  ...\n}")
+    
     search_set = set()
     
     # Get all unvisited entities in the current layer
@@ -198,6 +204,8 @@ def _get_search_entity_refs(problem: LinkerProblem, current_state: LinkerSearchS
         if entity_idx in current_state.visited_layer_entity_idx_set:
             continue
         search_set.add(EntityReference(current_layer, entity_idx))
+        
+    # print(str(search_set))
     
     if len(search_set) > 0:
         return search_set
@@ -205,25 +213,28 @@ def _get_search_entity_refs(problem: LinkerProblem, current_state: LinkerSearchS
     # If there were no unvisited entities in the current layer, get all entities in the next layer
     next_layer = current_layer + 1
     
-    if len(problem.layers) >= next_layer:
-        return None
+    # print("next layer idx: {}".format(next_layer))
+    # print("number of layers: "+str(len(problem.layers)))
+    
+    if next_layer >= len(problem.layers):
+        return set()
     
     return {EntityReference(next_layer, i) for i in range(len(problem.layers[next_layer]))}
 
 
 def _get_cost_map(problem: LinkerProblem, current_state: LinkerSearchState):
     
-    cost_map = [[0 for _ in range(problem.get_num_cols())] for _ in range(problem.get_num_rows())]
+    cost_map = [[0 for _ in range(problem.get_num_cols()+1)] for _ in range(problem.get_num_rows()+1)]
     
     # print(problem.num_rows, problem.num_cols)
     # print(len(problem.total_image_mask), len(problem.total_image_mask[0]))
     
-    for r in range(problem.get_num_rows()):
-        for c in range(problem.get_num_cols()):
+    for r in range(len(cost_map)):
+        for c in range(len(cost_map[r])):
             # print(r, c)
-            if current_state.visited_mask[r][c]:
+            if check_grid_element_safe(current_state.visited_mask, r, c, default=False):
                 cost_map[r][c] = problem.cost_menu.visited_mask_cost
-            elif problem.total_image_mask[r][c]:
+            elif check_grid_element_safe(problem.total_image_mask, r, c, default=False):
                 cost_map[r][c] = problem.cost_menu.future_mask_cost
             else:
                 cost_map[r][c] = problem.cost_menu.base_cost
@@ -249,7 +260,7 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
     # Set up the sub problem
     search_entity_refs = _get_search_entity_refs(problem, current_state)
     if len(search_entity_refs) == 0:
-        return None
+        raise Exception("No entities to search")
     
     sub_problem = GetChildrenProblem(
         layers=problem.layers,
@@ -259,6 +270,10 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
     )
     
     children = []
+    
+    current_visited_layer_entity_idx_set = current_state.visited_layer_entity_idx_set
+    if len(current_visited_layer_entity_idx_set) == len(problem.layers[current_state.cur_entity_ref.layer_idx]):
+        current_visited_layer_entity_idx_set = set()
     
     # Get path to border
     if current_state.cur_entity_ref.entity_idx is not None:
@@ -271,11 +286,12 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
             path=current_state.path.copy() + [PathItem(child_linkage_points, child_entity_ref)]
         )
         children.append(child)
+        print("    Got link with border")
     
     # Search child entities
-    for _ in range(num_children):
+    for i in range(num_children):
         child_entity_ref, child_linkage_points, child_cost = search_for_close_entity_links(sub_problem)
-        child_visited_layer_entity_idx_set = current_state.visited_layer_entity_idx_set.copy()
+        child_visited_layer_entity_idx_set = current_visited_layer_entity_idx_set.copy()
         child_visited_layer_entity_idx_set.add(child_entity_ref.entity_idx)
         child_visited_mask = get_grid_mask_union(current_state.visited_mask, problem.layers[child_entity_ref.layer_idx][child_entity_ref.entity_idx].get_entity_grid_mask())
         child = LinkerSearchState(
@@ -287,7 +303,9 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
         )
         children.append(child)
         sub_problem.search_entity_refs.remove(child_entity_ref)
+        print("    Got link entity child "+str(i))
         if len(sub_problem.search_entity_refs) == 0:
+            print("    breaking early")
             break
         
     return children
