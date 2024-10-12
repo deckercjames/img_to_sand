@@ -45,18 +45,12 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
     while True:
         next_fringe = []
         
-        print("expanding fringe, length="+str(len(fringe))+", itteration="+str(itter_cnt))
         itter_cnt += 1
         
         while len(fringe) > 0:
             
             # Pop next state
             _, current_state = heapq.heappop(fringe)
-            
-            if current_state.cur_entity_ref.entity_idx is None:
-                print("  expanding child [border], remaining fringe length="+str(len(fringe)))
-            else:
-                print("  expanding child [entity], remaining fringe length="+str(len(fringe)))
             
             # print("\n\nCurrentState {")
             # print("  current_entity_ref: {}".format(str(current_state.cur_entity_ref)))

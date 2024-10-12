@@ -286,7 +286,6 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
             path=current_state.path.copy() + [PathItem(child_linkage_points, child_entity_ref)]
         )
         children.append(child)
-        print("    Got link with border")
     
     # Search child entities
     for i in range(num_children):
@@ -303,9 +302,7 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
         )
         children.append(child)
         sub_problem.search_entity_refs.remove(child_entity_ref)
-        print("    Got link entity child "+str(i))
         if len(sub_problem.search_entity_refs) == 0:
-            print("    breaking early")
             break
         
     return children
