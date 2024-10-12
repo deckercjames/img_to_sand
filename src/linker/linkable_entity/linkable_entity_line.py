@@ -8,6 +8,7 @@ from collections import deque
 
 class LinkableEntityLine(LinkableEntity):
     def __init__(self, line_grid_mask, gateway_points):
+        super().__init__(gateway_points)
         self.line_grid_mask = line_grid_mask
         self.gateway_points = gateway_points
 

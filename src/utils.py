@@ -1,9 +1,23 @@
 
 from copy import deepcopy
+from typing import List
 
 
 def get_list_element_cyclic(list, i):
     return list[i % len(list)]
+
+
+def get_neighbor_points(r: int, c: int) -> List[tuple[int, int]]:
+    return [
+        (r-1, c  ),
+        (r-1, c+1),
+        (r,   c+1),
+        (r+1, c+1),
+        (r+1, c  ),
+        (r+1, c-1),
+        (r,   c-1),
+        (r-1, c-1),
+    ]
 
 
 def check_grid_element_safe(grid, r, c, default=None):

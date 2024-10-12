@@ -45,13 +45,13 @@ def test_linkable_entity_blob_basic():
     # Define Exected Output
     exp_entry_str_rep = \
         "              \n" \
-        "  .........   \n" \
+        "  #...#...#   \n" \
         " ...........  \n" \
-        " ...#...#.... \n" \
-        "  .....#..... \n" \
+        " ...#...#...# \n" \
+        " #.....#..... \n" \
         "  ........... \n" \
-        "   ....       \n" \
-        "              \n"
+        "   #...  #   #\n" \
+        "      #       \n"
     exp_exit_str_rep = \
         "              \n" \
         "  #...#...#   \n" \

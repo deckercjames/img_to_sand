@@ -8,6 +8,7 @@ from src.tree import TreeNode
 
 class LinkableEntityBlob(LinkableEntity):
     def __init__(self, blob, entry_points, exit_points):
+        super().__init__(entry_points)
         self.blob = blob
         self.entry_points = entry_points
         self.exit_point = exit_points
@@ -17,6 +18,10 @@ class LinkableEntityBlob(LinkableEntity):
 
     def get_exit_points(self):
         return self.exit_point
+
+    def get_entity_grid_mask(self):
+        return self.blob.mask
+
 
 
 
@@ -38,7 +43,9 @@ def get_blob_linkable_entity(blob: Blob, spacing: int):
     if spacing <= 0:
         raise Exception("Spacing must be a positive integer!")
     exit_points = blob.outer_contour[::spacing]
-    blob_topograph = get_blob_topography(blob)
-    # print(get_topography_tree_visual(blob_topograph, len(blob.mask), len(blob.mask[0])))
-    entry_points = get_leaf_entry_points(blob_topograph, spacing)
+    blob_topography = get_blob_topography(blob)
+    # print(get_topography_tree_visual(blob_topography, len(blob.mask), len(blob.mask[0])))
+    entry_points = get_leaf_entry_points(blob_topography, spacing)
+    if blob_topography.children != 0:
+        entry_points.extend(blob_topography.node_data[::spacing])
     return LinkableEntityBlob(blob, entry_points, exit_points)
