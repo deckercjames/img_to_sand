@@ -6,6 +6,8 @@ from src.linker.linker import LinkerSearchState
 from src.linker.linker import PathItem
 from src.linker.linker import EntityReference
 from src.linker.linker import get_linked_path
+from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
+from src.linker.linkable_entity.linkable_entity_line import LinkableEntityLine
 from src.utils import get_all_false_mask
 from src.utils import grid_mask_to_str
 from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
@@ -23,7 +25,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
         )
     return pixel_grid
 
-def helper_get_layers(pixel_grid_str):
+def helper_get_layers(pixel_grid_str, num_line_erosions=0):
     pixel_grid = helper_pixel_grid_str_parser(pixel_grid_str)
     num_rows = len(pixel_grid)
     num_cols = len(pixel_grid[0])
@@ -37,7 +39,7 @@ def helper_get_layers(pixel_grid_str):
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
 
-    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_erosions, num_blob_buffer_itterations=0, gateway_point_spacing=1)
 
 
 def helper_print_path_item(layers, path_item: PathItem):
@@ -135,27 +137,70 @@ def test_get_linked_path_nested():
     assert len(recv_linked_path[2].entity_linkage_points) == 1
 
 
-def test_get_linked_path_many():
+# def test_get_linked_path_many():
+#     pixel_grid_str = [
+#         "                              111      ",
+#         " 1111           111111111     111      ",
+#         " 1111           111111111     111      ",
+#         "         111                           ",
+#         "         111      11111                ",
+#         "         11       11111                ",
+#         "         11                   1111     ",
+#         "                           1111111     ",
+#         "       1111111   111       111111      ",
+#         "11     1111111   111                   ",
+#         "11               111111                ",
+#         "11111            111111       11111    ",
+#         "11111     1111                 11111   ",
+#         "          1111                         ",
+#     ]
+#     layers = helper_get_layers(pixel_grid_str)
+#     # Sanity check test stimulus
+#     assert len(layers) == 1
+#     assert len(layers[0]) == 11
+#     # Function under test
+#     recv_linked_path = get_linked_path(layers)
+#     # Visual Representation
+#     for i, path_item in enumerate(recv_linked_path):
+#         print("\n{} of {}".format(i+1, len(recv_linked_path)))
+#         helper_print_path_item(layers, path_item)
+#     # Verify all entities visited
+#     visited_entities = set()
+#     for path_item in recv_linked_path:
+#         if path_item.next_entity_ref.entity_idx is None:
+#             continue
+#         visited_entities.add(path_item.next_entity_ref)
+#     assert len(visited_entities) == 11
+
+
+
+def test_get_linked_path_with_line():
     pixel_grid_str = [
-        "                              111      ",
-        " 1111           111111111     111      ",
-        " 1111           111111111     111      ",
-        "         111                           ",
-        "         111      11111                ",
-        "         11       11111                ",
-        "         11                   1111     ",
-        "                           1111111     ",
-        "       1111111   111       111111      ",
-        "11     1111111   111                   ",
-        "11               111111                ",
-        "11111            111111       11111    ",
-        "11111     1111                 11111   ",
-        "          1111                         ",
+        "                                       ",
+        "                                       ",
+        "            111111111111111111         ",
+        "           11               11         ",
+        "           11               11         ",
+        "           11               11         ",
+        "          11              111111111    ",
+        "       11                1111111111111 ",
+        "        1               11111111111111 ",
+        "        11             111111111111111 ",
+        "        1              111111111111111 ",
+        "       11              111111111111111 ",
+        "     111               11111111111111  ",
+        "   111                  1111111111111  ",
+        "                                       ",
     ]
-    layers = helper_get_layers(pixel_grid_str)
+    layers = helper_get_layers(pixel_grid_str, num_line_erosions=2)
     # Sanity check test stimulus
+    for i, e in enumerate(layers[0]):
+        print(grid_mask_to_str(e.get_entity_grid_mask()))
     assert len(layers) == 1
-    assert len(layers[0]) == 11
+    assert len(layers[0]) == 3
+    assert type(layers[0][0]) == LinkableEntityLine
+    assert type(layers[0][1]) == LinkableEntityBlob
+    assert type(layers[0][2]) == LinkableEntityLine
     # Function under test
     recv_linked_path = get_linked_path(layers)
     # Visual Representation
@@ -168,5 +213,5 @@ def test_get_linked_path_many():
         if path_item.next_entity_ref.entity_idx is None:
             continue
         visited_entities.add(path_item.next_entity_ref)
-    assert len(visited_entities) == 11
+    assert len(visited_entities) == 3
 

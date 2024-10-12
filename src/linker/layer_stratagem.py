@@ -30,7 +30,7 @@ def get_all_separate_grid_masks(grid_mask):
         for c in range(num_cols):
             if not grid_mask[r][c]:
                 continue
-            separate_grid_mask = get_flood_fill_grid_mask(grid_mask, r, c)
+            separate_grid_mask = get_flood_fill_grid_mask(grid_mask, r, c, diag=True)
             separate_grid_masks.append(separate_grid_mask)
             grid_mask = get_grid_mask_subtraction(grid_mask, separate_grid_mask)
             

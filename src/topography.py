@@ -65,7 +65,7 @@ def get_topography_tree_visual(root, num_rows, num_cols):
     return buf
     
 
-def get_flood_fill_grid_mask(grid_mask, start_r, start_c):
+def get_flood_fill_grid_mask(grid_mask, start_r, start_c, diag=False):
     cell_stack = []
     cell_stack.append((start_r, start_c))
 
@@ -86,6 +86,11 @@ def get_flood_fill_grid_mask(grid_mask, start_r, start_c):
         cell_stack.append((r - 1, c))
         cell_stack.append((r, c - 1))
         cell_stack.append((r, c + 1))
+        if diag:
+            cell_stack.append((r + 1, c - 1))
+            cell_stack.append((r + 1, c + 1))
+            cell_stack.append((r - 1, c - 1))
+            cell_stack.append((r - 1, c + 1))
         grid_blob_mask[r][c] = True
     
     return grid_blob_mask

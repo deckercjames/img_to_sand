@@ -169,7 +169,7 @@ def test_get_child_states_from_beginning():
             ],
             visited_layer_entity_idx_set={0},
             cost_to_state=1,
-            path=[PathItem([(2,0), (2,1)], EntityReference(0,0))]
+            path=[PathItem([(0,3), (1,3)], EntityReference(0,0))]
         ),
     ]
     assert len(recv_child_states) == 2
