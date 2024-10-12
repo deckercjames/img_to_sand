@@ -33,8 +33,12 @@ def helper_get_layers(pixel_grid_str):
     
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
+    
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    
+    total_image_mask = [[c != ' ' for c in line] for line in pixel_grid_str]
 
-    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    return layers, total_image_mask
     
     
 
@@ -51,23 +55,13 @@ def test_get_one_child_states_from_beginning():
         "            ",
         "            ",
     ]
-    layers = helper_get_layers(pixel_grid_str)
+    layers, total_image_mask = helper_get_layers(pixel_grid_str)
     print("LAYERS")
     print(layers)
     # build the layers with the other code. Assume it to be correct
     test_problem = LinkerProblem(
         layers=layers,
-        total_image_mask=[
-                [False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, False, False, False, True,  True,  False, False, False, False, False],
-                [False, False, False, False, True,  True,  True,  True,  False, False, False, False],
-                [False, False, False, False, False, False, True,  True,  False, False, False, False],
-                [False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        total_image_mask=total_image_mask,
         cost_menu=CostMenu(
             visited_mask_cost=100000,
             future_mask_cost=0,
@@ -121,19 +115,13 @@ def test_get_child_states_from_beginning():
         "   11     2222222 ",
         "                  ",
     ]
-    layers = helper_get_layers(pixel_grid_str)
+    layers, total_image_mask = helper_get_layers(pixel_grid_str)
     print("LAYERS")
     print(layers)
     # build the layers with the other code. Assume it to be correct
     test_problem = LinkerProblem(
         layers=layers,
-        total_image_mask=[
-                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
-                [False, True,  True,  True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
-                [False, False, False, True,  True,  False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
-                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        total_image_mask=total_image_mask,
         cost_menu=CostMenu(
             visited_mask_cost=100000,
             future_mask_cost=0,
@@ -197,19 +185,13 @@ def test_get_child_states_from_entity():
         "   11     2222222 ",
         "                  ",
     ]
-    layers = helper_get_layers(pixel_grid_str)
+    layers, total_image_mask = helper_get_layers(pixel_grid_str)
     print("LAYERS")
     print(layers)
     # build the layers with the other code. Assume it to be correct
     test_problem = LinkerProblem(
         layers=layers,
-        total_image_mask=[
-                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-                [False, False, True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
-                [False, True,  True,  True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
-                [False, False, False, True,  True,  False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
-                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        total_image_mask=total_image_mask,
         cost_menu=CostMenu(
             visited_mask_cost=100000,
             future_mask_cost=0,
@@ -238,6 +220,83 @@ def test_get_child_states_from_entity():
     # assert False
     # Function Under Test
     recv_child_states = get_child_states(test_problem, test_state, 1)
+    exp_child_states = [
+        LinkerSearchState(
+            cur_entity_ref=EntityReference(0, None),
+            visited_mask=[
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
+                [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+            ],
+            visited_layer_entity_idx_set={1},
+            cost_to_state=2,
+            path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(1,16), (0,16)], EntityReference(0,None))]
+        ),
+        LinkerSearchState(
+            cur_entity_ref=EntityReference(0, 0),
+            visited_mask=[
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
+                [False, True,  True,  True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
+                [False, False, False, True,  True,  False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+            ],
+            visited_layer_entity_idx_set={1,0},
+            cost_to_state=6,
+            path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(2, 10), (2, 9), (2, 8), (2, 7), (2, 6), (2, 5)], EntityReference(0,0))]
+        ),
+    ]
+    assert len(recv_child_states) == 2
+    assert recv_child_states[0] == exp_child_states[0]
+    assert recv_child_states[1] == exp_child_states[1]
+
+
+def test_get_too_many_child_states_from_entity():
+    pixel_grid_str = [
+        "                  ",
+        "  11      222222  ",
+        " 1111      22222  ",
+        "   11     2222222 ",
+        "                  ",
+    ]
+    layers, total_image_mask = helper_get_layers(pixel_grid_str)
+    print("LAYERS")
+    print(layers)
+    # build the layers with the other code. Assume it to be correct
+    test_problem = LinkerProblem(
+        layers=layers,
+        total_image_mask=total_image_mask,
+        cost_menu=CostMenu(
+            visited_mask_cost=100000,
+            future_mask_cost=0,
+            base_cost=1
+        )
+    )
+    test_state = LinkerSearchState(
+        cur_entity_ref=EntityReference(0, 1),
+        visited_mask=[
+            [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+            [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
+            [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
+            [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
+            [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+        ],
+        visited_layer_entity_idx_set={1},
+        cost_to_state=1,
+        path=[PathItem([(0,15), (1,14)], EntityReference(0,1))]
+    )
+    # Sanity print problem
+    print("Len Layers "+str(len(layers)))
+    print("Len Layers[0] "+str(len(layers[0])))
+    for e in layers[0]:
+        print(grid_mask_to_str(e.get_entity_grid_mask()))
+        print(e.get_entry_points())
+    # assert False
+    # Function Under Test
+    # Request two entity child states, enven though there is only one
+    recv_child_states = get_child_states(test_problem, test_state, 2)
     exp_child_states = [
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, None),

@@ -287,5 +287,7 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
         )
         children.append(child)
         sub_problem.search_entity_refs.remove(child_entity_ref)
+        if len(sub_problem.search_entity_refs) == 0:
+            break
         
     return children
