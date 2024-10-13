@@ -20,7 +20,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
         )
     return pixel_grid
 
-def helper_get_layers(pixel_grid_str):
+def helper_get_layers(pixel_grid_str, num_line_errosions=0):
     pixel_grid = helper_pixel_grid_str_parser(pixel_grid_str)
     num_rows = len(pixel_grid)
     num_cols = len(pixel_grid[0])
@@ -34,11 +34,39 @@ def helper_get_layers(pixel_grid_str):
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
     
-    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_errosions, num_blob_buffer_itterations=0, gateway_point_spacing=1)
     
     total_image_mask = [[c != ' ' for c in line] for line in pixel_grid_str]
 
     return layers, total_image_mask
+    
+def helper_print_path_item(layers, path_item: PathItem):
+    assert type(path_item) == PathItem
+    num_rows = len(layers[0][0].get_entity_grid_mask())
+    num_cols = len(layers[0][0].get_entity_grid_mask()[0])
+    rep = [[' ' for _ in range(num_cols+1)] for _ in range(num_rows+1)]
+    # apply entity
+    entity_ref = path_item.next_entity_ref
+    if entity_ref.entity_idx is not None:
+        entity = layers[entity_ref.layer_idx][entity_ref.entity_idx]
+        for r in range(num_rows):
+            for c in range(num_cols):
+                if entity.get_entity_grid_mask()[r][c]:
+                    rep[r][c] = '#'
+    # Apply path
+    for r,c in path_item.entity_linkage_points:
+        print(r,c)
+        rep[r][c] = '*'
+    # Convert to str
+    buf = ""
+    buf += "+" + "-" * (num_cols+1) + "+\n"
+    for row in rep:
+        buf += "|"
+        for cell in row:
+            buf += cell
+        buf += "|\n"
+    buf += "+" + "-" * (num_cols+1) + "+\n"
+    print(buf)
     
     
 
@@ -156,7 +184,7 @@ def test_get_child_states_from_beginning():
             ],
             visited_layer_entity_idx_set={1},
             cost_to_state=1,
-            path=[PathItem([(0,15), (1,15)], EntityReference(0,1))]
+            path=[PathItem([(5,14), (4,14)], EntityReference(0,1))]
         ),
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 0),
@@ -169,7 +197,7 @@ def test_get_child_states_from_beginning():
             ],
             visited_layer_entity_idx_set={0},
             cost_to_state=1,
-            path=[PathItem([(0,3), (1,3)], EntityReference(0,0))]
+            path=[PathItem([(2,0), (2,1)], EntityReference(0,0))]
         ),
     ]
     assert len(recv_child_states) == 2
@@ -217,7 +245,6 @@ def test_get_child_states_from_entity():
     for e in layers[0]:
         print(grid_mask_to_str(e.get_entity_grid_mask()))
         print(e.get_entry_points())
-    # assert False
     # Function Under Test
     recv_child_states = get_child_states(test_problem, test_state, 1)
     exp_child_states = [
@@ -293,7 +320,6 @@ def test_get_too_many_child_states_from_entity():
     for e in layers[0]:
         print(grid_mask_to_str(e.get_entity_grid_mask()))
         print(e.get_entry_points())
-    # assert False
     # Function Under Test
     # Request two entity child states, enven though there is only one
     recv_child_states = get_child_states(test_problem, test_state, 2)
@@ -328,3 +354,4 @@ def test_get_too_many_child_states_from_entity():
     assert len(recv_child_states) == 2
     assert recv_child_states[0] == exp_child_states[0]
     assert recv_child_states[1] == exp_child_states[1]
+

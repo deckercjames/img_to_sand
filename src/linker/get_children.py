@@ -23,9 +23,9 @@ class GetChildrenProblem:
     search_entity_refs: Set[EntityReference]
     cost_map: List[List[int]]
     def get_num_rows(self):
-        return len(self.cost_map)
+        return len(self.cost_map) - 1
     def get_num_cols(self):
-        return len(self.cost_map[0])
+        return len(self.cost_map[0]) - 1
     
 
 @dataclass
@@ -39,7 +39,7 @@ class GetChildrenSearchState:
 
 def _print_fringe(problem: GetChildrenProblem, fringe):
     # print(problem.num_rows, problem.num_cols)
-    grid = [[' ' for _ in range(problem.get_num_cols() + 2)] for _ in range(problem.get_num_rows() + 2)]
+    grid = [[' ' for _ in range(problem.get_num_cols() + 1)] for _ in range(problem.get_num_rows() + 1)]
     print(fringe[0])
     for e_ref in problem.search_entity_refs:
         for r,c in problem.layers[e_ref.layer_idx][e_ref.entity_idx].get_entry_points():
@@ -114,14 +114,15 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
     # print("border_is_goal "+str(border_is_goal))
     # print(problem.start_entity_ref)
     start_points = set()
+    print("Problem size")
     if problem.start_entity_ref.entity_idx is None: # Start on the boarder
-        for r in range(problem.get_num_rows() + 1):
+        for r in range(problem.get_num_rows()):
             start_points.add((r,0))
-            start_points.add((r,problem.get_num_cols()+1))
-        for c in range(problem.get_num_cols() + 1):
+            start_points.add((r,problem.get_num_cols()))
+        for c in range(problem.get_num_cols()):
             start_points.add((0, c))
-            start_points.add((problem.get_num_rows()+1, c))
-        start_points.add((problem.get_num_rows()+1, problem.get_num_cols()+1))
+            start_points.add((problem.get_num_rows(), c))
+        start_points.add((problem.get_num_rows(), problem.get_num_cols()))
     else: # start at an entity
         start_points = problem.layers[problem.start_entity_ref.layer_idx][problem.start_entity_ref.entity_idx].get_exit_points()
     
@@ -142,6 +143,8 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
 
 
     while len(fringe) > 0:
+        
+        # _print_fringe(problem, fringe)
         
         _, cur_state = heapq.heappop(fringe)
         

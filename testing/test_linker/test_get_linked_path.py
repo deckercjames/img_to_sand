@@ -89,8 +89,8 @@ def test_get_linked_path_basic():
         helper_print_path_item(layers, path_item)
     # Expected Result
     exp_linked_path = [
-        PathItem([(0,2), (1,2)], EntityReference(0,0)),
-        PathItem([(4,5), (4,6), (4,7), (4,8), (4,9), (4,10)], EntityReference(0,1)),
+        PathItem([(0,10), (1,10)], EntityReference(0,1)),
+        PathItem([(4, 10), (4, 9), (4, 8), (4, 7), (4, 6), (4, 5)], EntityReference(0,0)),
     ]
     # Verify
     assert len(recv_linked_path) == len(exp_linked_path)
@@ -137,40 +137,41 @@ def test_get_linked_path_nested():
     assert len(recv_linked_path[2].entity_linkage_points) == 1
 
 
-# def test_get_linked_path_many():
-#     pixel_grid_str = [
-#         "                              111      ",
-#         " 1111           111111111     111      ",
-#         " 1111           111111111     111      ",
-#         "         111                           ",
-#         "         111      11111                ",
-#         "         11       11111                ",
-#         "         11                   1111     ",
-#         "                           1111111     ",
-#         "       1111111   111       111111      ",
-#         "11     1111111   111                   ",
-#         "11               111111                ",
-#         "11111            111111       11111    ",
-#         "11111     1111                 11111   ",
-#         "          1111                         ",
-#     ]
-#     layers = helper_get_layers(pixel_grid_str)
-#     # Sanity check test stimulus
-#     assert len(layers) == 1
-#     assert len(layers[0]) == 11
-#     # Function under test
-#     recv_linked_path = get_linked_path(layers)
-#     # Visual Representation
-#     for i, path_item in enumerate(recv_linked_path):
-#         print("\n{} of {}".format(i+1, len(recv_linked_path)))
-#         helper_print_path_item(layers, path_item)
-#     # Verify all entities visited
-#     visited_entities = set()
-#     for path_item in recv_linked_path:
-#         if path_item.next_entity_ref.entity_idx is None:
-#             continue
-#         visited_entities.add(path_item.next_entity_ref)
-#     assert len(visited_entities) == 11
+def test_get_linked_path_many():
+    pixel_grid_str = [
+        "                              111      ",
+        " 1111           111111111     111      ",
+        " 1111           111111111     111      ",
+        "         111                           ",
+        "         111      11111                ",
+        "         11       11111                ",
+        "         11                   1111     ",
+        "                           1111111     ",
+        "       1111111   111       111111      ",
+        "11     1111111   111                   ",
+        "11               111111                ",
+        "11111            111111       11111    ",
+        "11111     1111                 11111   ",
+        "          1111                         ",
+    ]
+    layers = helper_get_layers(pixel_grid_str)
+    # Sanity check test stimulus
+    assert len(layers) == 1
+    assert len(layers[0]) == 11
+    # Function under test
+    recv_linked_path = get_linked_path(layers)
+    # Visual Representation
+    for i, path_item in enumerate(recv_linked_path):
+        print("\n{} of {}".format(i+1, len(recv_linked_path)))
+        helper_print_path_item(layers, path_item)
+    # Verify all entities visited
+    visited_entities = set()
+    for path_item in recv_linked_path:
+        if path_item.next_entity_ref.entity_idx is None:
+            continue
+        visited_entities.add(path_item.next_entity_ref)
+    assert len(visited_entities) == 11
+    # assert False
 
 
 

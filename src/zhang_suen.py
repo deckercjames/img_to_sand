@@ -3,6 +3,7 @@ from copy import deepcopy
 from src.utils import check_grid_element_safe
 from src.utils import get_grid_mask_subtraction
 from src.utils import get_mask_with_inward_bleed
+from src.utils import grid_mask_to_str
 
 #==================================================
 # Main Zhang Suen Algorithm
@@ -82,6 +83,9 @@ def get_area_blobs(erroded_grid_mask):
 
 def get_flood_fill_area_blobs(original_grid_mask, micro_blob_grid_mask, itterations):
     
+    print("Restoration iteration {} of {}".format(0, itterations))
+    print(grid_mask_to_str(micro_blob_grid_mask))
+    
     for i in range(itterations):
         intrim_blob_grid_mask = deepcopy(micro_blob_grid_mask)
         for r in range(len(micro_blob_grid_mask)):
@@ -91,6 +95,8 @@ def get_flood_fill_area_blobs(original_grid_mask, micro_blob_grid_mask, itterati
                         any(_get_neighbours(micro_blob_grid_mask, r, c))):
                     intrim_blob_grid_mask[r][c] = True
         micro_blob_grid_mask = intrim_blob_grid_mask
+        print("Restoration iteration {} of {}".format(i+1, itterations))
+        print(grid_mask_to_str(micro_blob_grid_mask))
     return micro_blob_grid_mask
 
 
@@ -98,12 +104,14 @@ def get_split_lines_and_blobs(blob_grid_mask, itterations):
     
     erroded_grid_mask = deepcopy(blob_grid_mask)
     
-    for _ in range(itterations):
+    for i in range(itterations):
         zhang_suen_errosion_itteration(erroded_grid_mask)
+        print("\nErosion iteration {} of {}".format(i+1, itterations))
+        print(grid_mask_to_str(erroded_grid_mask))
     
     micro_blob_grid_mask = get_area_blobs(erroded_grid_mask)
     
-    blob_only_grid_mask = get_flood_fill_area_blobs(blob_grid_mask, micro_blob_grid_mask, itterations * 2 + 1)
+    blob_only_grid_mask = get_flood_fill_area_blobs(blob_grid_mask, micro_blob_grid_mask, itterations + 3)
     line_only_grid_mask = get_grid_mask_subtraction(erroded_grid_mask, blob_only_grid_mask)
     
     return (blob_only_grid_mask, line_only_grid_mask)
