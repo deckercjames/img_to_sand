@@ -22,16 +22,16 @@ def load_image(image_path):
         print("Fail")
         return
         
-    print("Got image {}x{}", image_height, image_width)
+    # print("Got image {}x{}", image_height, image_width)
     
-    print(pixels[0][0])
+    # print(pixels[0][0])
     
     # count the number of colors
-    colors = set()
-    for row in pixels:
-        colors.update(row)
-    print("Num colors ", len(colors))
-    print(colors)
+    # colors = set()
+    # for row in pixels:
+    #     colors.update(row)
+    # print("Num colors ", len(colors))
+    # print(colors)
     
     return pixels
 
@@ -89,7 +89,7 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
     
     visited_mask = [[False for _ in range(len(row))] for row in raw_pixel_grid]
     
-    print("Enumerating")
+    # print("Enumerating")
     
     for r in range(len(raw_pixel_grid)):
         for c in range(len(raw_pixel_grid[0])):
@@ -122,15 +122,15 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
             if idx != 0:
                 pixel_enumeration_index += 1
             
-    print(grid_mask_to_str(visited_mask))
+    # print(grid_mask_to_str(visited_mask))
     
-    print("Pixels enumerated. {} uniqe".format(pixel_enumeration_index-1))
+    # print("Pixels enumerated. {} uniqe".format(pixel_enumeration_index-1))
     
-    buf = ""
-    for r in range(len(enumerated_pixel_grid)):
-        for c in range(len(enumerated_pixel_grid[0])):
-            buf += str(enumerated_pixel_grid[r][c])
-        buf += "\n"
-    print(buf)
+    # buf = ""
+    # for r in range(len(enumerated_pixel_grid)):
+    #     for c in range(len(enumerated_pixel_grid[0])):
+    #         buf += str(enumerated_pixel_grid[r][c])
+    #     buf += "\n"
+    # print(buf)
     
     return enumerated_pixel_grid

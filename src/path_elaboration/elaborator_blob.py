@@ -102,7 +102,6 @@ def elaborate_blob(entity: LinkableEntityBlob, entry_point: tuple[int, int], exi
         
         # If there is an un-elaborated child, move there
         if traverse_to_child is not None:
-            print("Traversing to child")
             inter_contour_path, current_contour_idx = link_adjacent_contours(current_node.contour, traverse_to_child.contour, current_contour_idx)
             path.extend(inter_contour_path)
             current_node = traverse_to_child
@@ -117,7 +116,6 @@ def elaborate_blob(entity: LinkableEntityBlob, entry_point: tuple[int, int], exi
         next_contour_index = (current_contour_idx + elaborated_segment_length) % len(current_node.contour)
         path.extend(get_cyclic_list_slice(current_node.contour, current_contour_idx, next_contour_index))
         current_node.elaborated = True
-        print("Elaborating self. Total contour length: {}, segment_length: {}".format(len(current_node.contour), elaborated_segment_length))
         
         # If there is no parent, we are done
         if current_node.parent is None:
@@ -136,8 +134,6 @@ def elaborate_blob(entity: LinkableEntityBlob, entry_point: tuple[int, int], exi
             if check_point == exit_point:
                 break
         else:
-            print("Contour")
-            print(str(current_node.contour))
             raise Exception("Could not find exit point ({},{})".format(*exit_point))
         
     return path

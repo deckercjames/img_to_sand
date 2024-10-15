@@ -60,18 +60,7 @@ def elaborate_path(layers, path_items: PathItem):
     num_cols = len(layers[0][0].get_entity_grid_mask()[0])
     
     elaborated_path = []
-    
-    # Debug
-    print("\nPATH")
-    for i, path_item in enumerate(path_items):
-        next_entity_ref = path_item.next_entity_ref
-        if next_entity_ref.entity_idx is None:
-            print("BORDER")
-            continue
-        entity = layers[next_entity_ref.layer_idx][next_entity_ref.entity_idx]
-        print(type(entity))
-    print()
-    
+
     for i, path_item in enumerate(path_items):
         # Add the link between the entities
         elaborated_path.extend(path_item.entity_linkage_points)
@@ -80,7 +69,6 @@ def elaborate_path(layers, path_items: PathItem):
         next_entity_ref = path_item.next_entity_ref
         enitty_entry_point = path_item.entity_linkage_points[-1]
         entity_exit_point = path_items[i+1].entity_linkage_points[0] if i + 1 < len(path_items) else None
-        print("Exit ", entity_exit_point)
         
         # Border
         if next_entity_ref.entity_idx is None:

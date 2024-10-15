@@ -13,41 +13,55 @@ from src.linker.linker import get_linked_path
 from src.path_elaboration.elaborator import elaborate_path
 from src.visual_debugger import export_path_to_image
 
+import logging
+import sys
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
+
 def process_image(image_path):
     
-    
-    # # Write debug image
-    # export_path_to_image([(3,5), (40,60), (3,80), (90,50), (46,90)], 100, 100, "test_output.png")
-    # return
-    
-    # TODO open image
+    # Load imagee
     raw_pixels = load_image(image_path)
+    logging.info("Image loaded.")
     
     num_rows = len(raw_pixels)
     num_cols = len(raw_pixels[0])
     
-    
-    # TODO cluster like colors
+    # Cluster like colors
     pixel_grid = enumerate_pixels(raw_pixels)
+    logging.info("Enumerated pixels.")
     
     # Extract blobs
     blob_trees = get_blob_tree_nodes_from_pixel_grid(pixel_grid)
+    logging.info("Extracted blobs.")
     
     # Consolidate blob trees
     consolidated_blob_tree = consolidate_blob_trees(blob_trees, num_rows, num_cols)
+    logging.info("Consolidated blob trees.")
     
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
+    logging.info("Unwrapped blob tree.")
     
     # Expand blobs to topography
     layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
-    
+    logging.info("Compiled layers.")
     
     # Link Entities
+    logging.info("Linking entities...")
     linked_path = get_linked_path(layers)
+    logging.info("Entities linked.")
     
     # Elaborate Path
     elaborated_path = elaborate_path(layers, linked_path)
+    logging.info("Path elaborated.")
     
     # Write debug image
     export_path_to_image(elaborated_path, num_rows, num_cols, "test_output.png")
@@ -64,7 +78,11 @@ def main(input_args):
     parser.add_argument('image', type=str, help='The path of the image to load')
     args = parser.parse_args(input_args)
     
-    process_image(args.image)
+    try:
+        process_image(args.image)
+    except KeyboardInterrupt:
+        print("")
+        logging.info("Keyboard Interupt Received")
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

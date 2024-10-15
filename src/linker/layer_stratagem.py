@@ -44,12 +44,12 @@ def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itter
     for blob in blob_layer:
         micro_blobs_grid_mask, lines_grid_mask = get_split_lines_and_blobs(blob.mask, num_line_errosion_itterations)
         
-        print("ITTER")
-        print("Current length of all_linkable_entities "+str(len(all_linkable_entities)))
-        print("micro blobs mask")
-        print(grid_mask_to_str(micro_blobs_grid_mask))
-        print("line grid mask")
-        print(grid_mask_to_str(lines_grid_mask))
+        # print("ITTER")
+        # print("Current length of all_linkable_entities "+str(len(all_linkable_entities)))
+        # print("micro blobs mask")
+        # print(grid_mask_to_str(micro_blobs_grid_mask))
+        # print("line grid mask")
+        # print(grid_mask_to_str(lines_grid_mask))
         
         # Handle lines from blob
         line_grid_masks = get_all_separate_grid_masks(lines_grid_mask)
