@@ -23,6 +23,8 @@ class LinkerProblem:
         return len(self.total_image_mask)
     def get_num_cols(self):
         return len(self.total_image_mask[0])
+    def get_total_num_entities_to_link(self):
+        return sum([len(layer) for layer in self.layers])
     
 
 PathItem = namedtuple("PathItem", ["entity_linkage_points", "next_entity_ref"])

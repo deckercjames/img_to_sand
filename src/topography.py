@@ -63,7 +63,7 @@ def get_topography_tree_visual(root, num_rows, num_cols):
         buf += '--' if hor_fences[num_rows][c] else "  "
     buf += "+\n"
     return buf
-    
+
 
 def get_flood_fill_grid_mask(grid_mask, start_r, start_c, diag=False):
     cell_stack = []

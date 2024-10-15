@@ -46,6 +46,12 @@ def get_grid_mask_union(m1, m2):
     return [[(m1[r][c] or m2[r][c]) for c in range(len(m1[r]))] for r in range(len(m1))]
 
 
+def get_cyclic_list_slice(list, start_idx, end_idx):
+    if end_idx > start_idx:
+        return list[start_idx:end_idx]
+    return list[start_idx:] + list[:end_idx]
+
+
 def grid_mask_to_str(grid_mask):
     buf = ""
     buf += "+" + "-" * len(grid_mask[0]) + "+\n"

@@ -17,7 +17,7 @@ def elaborate_border(num_rows, num_cols, entry_point, exit_point):
     if (exit_r != 0 and exit_r != num_rows) and (exit_c != 0 and exit_c != num_cols):
         raise Exception("Exit point not on edge")
     
-    # If they are on the same edge, no intermediate poisnts are necessary
+    # If they are on the same edge, no intermediate points are necessary
     if entry_r == exit_r or entry_c == exit_c:
         return []
     
@@ -61,14 +61,26 @@ def elaborate_path(layers, path_items: PathItem):
     
     elaborated_path = []
     
+    # Debug
+    print("\nPATH")
+    for i, path_item in enumerate(path_items):
+        next_entity_ref = path_item.next_entity_ref
+        if next_entity_ref.entity_idx is None:
+            print("BORDER")
+            continue
+        entity = layers[next_entity_ref.layer_idx][next_entity_ref.entity_idx]
+        print(type(entity))
+    print()
+    
     for i, path_item in enumerate(path_items):
         # Add the link between the entities
-        elaborate_path.extend(path_item.entity_linkage_points)
+        elaborated_path.extend(path_item.entity_linkage_points)
         
         # Add the entity
         next_entity_ref = path_item.next_entity_ref
         enitty_entry_point = path_item.entity_linkage_points[-1]
         entity_exit_point = path_items[i+1].entity_linkage_points[0] if i + 1 < len(path_items) else None
+        print("Exit ", entity_exit_point)
         
         # Border
         if next_entity_ref.entity_idx is None:
@@ -77,8 +89,10 @@ def elaborate_path(layers, path_items: PathItem):
         
         entity = layers[next_entity_ref.layer_idx][next_entity_ref.entity_idx]
         if type(entity) == LinkableEntityBlob:
-            elaborated_path.extend(elaborate_blob(enitty_entry_point, entity_exit_point))
+            elaborated_path.extend(elaborate_blob(entity, enitty_entry_point, entity_exit_point, spiral_spacing=3))
         elif type(entity) == LinkableEntityLine:
-            elaborated_path.extend(elaborate_line(enitty_entry_point, entity_exit_point))
+            elaborated_path.extend(elaborate_line(entity, enitty_entry_point, entity_exit_point))
         else:
             raise Exception("Unknown entity type")
+        
+    return elaborated_path

@@ -7,9 +7,10 @@ from src.topography import get_topography_tree_visual
 from src.tree import TreeNode
 
 class LinkableEntityBlob(LinkableEntity):
-    def __init__(self, blob, entry_points, exit_points):
+    def __init__(self, blob: Blob, blob_topography: TreeNode, entry_points, exit_points):
         super().__init__(entry_points)
         self.blob = blob
+        self.blob_topography = blob_topography
         self.entry_points = entry_points
         self.exit_point = exit_points
 
@@ -48,4 +49,4 @@ def get_blob_linkable_entity(blob: Blob, spacing: int):
     entry_points = get_leaf_entry_points(blob_topography, spacing)
     if blob_topography.children != 0:
         entry_points.extend(blob_topography.node_data[::spacing])
-    return LinkableEntityBlob(blob, entry_points, exit_points)
+    return LinkableEntityBlob(blob, blob_topography, entry_points, exit_points)

@@ -13,6 +13,9 @@ from src.utils import check_grid_element_safe
 from src.linker.get_children import get_child_states
 from src.linker.linker_problem import *
 
+from src.pbar import ProgressBar
+
+
 entity_link_cache = {}
 
 
@@ -41,11 +44,15 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
     fringe = []
     heapq.heappush(fringe, (0, start_state))
     
+    pbar = ProgressBar(problem.get_total_num_entities_to_link() * 2)
+    
     itter_cnt = 0
     while True:
         next_fringe = []
         
         itter_cnt += 1
+        # print(itter_cnt, problem.get_total_num_entities_to_link())
+        pbar.update()
         
         while len(fringe) > 0:
             
@@ -60,6 +67,7 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
             
             # Check goal state
             if is_goal_state(problem, current_state):
+                pbar.complete()
                 return current_state.path
             
             # Expand children
@@ -95,4 +103,4 @@ def get_linked_path(layers):
         )
     )
     
-    return get_single_linked_path(problem, 5, 10)
+    return get_single_linked_path(problem, 4, 8)

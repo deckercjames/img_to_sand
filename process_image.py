@@ -1,38 +1,56 @@
 
 import sys
+from argparse import ArgumentParser
 
 from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
 from src.linker.linker import LinkerProblem
+from src.image_loader import load_image
+from src.image_loader import enumerate_pixels
+from src.linker.linker import get_linked_path
+from src.path_elaboration.elaborator import elaborate_path
+from src.visual_debugger import export_path_to_image
 
 def process_image(image_path):
     
+    
+    # # Write debug image
+    # export_path_to_image([(3,5), (40,60), (3,80), (90,50), (46,90)], 100, 100, "test_output.png")
+    # return
+    
     # TODO open image
+    raw_pixels = load_image(image_path)
+    
+    num_rows = len(raw_pixels)
+    num_cols = len(raw_pixels[0])
+    
     
     # TODO cluster like colors
-    pixel_grid = None
+    pixel_grid = enumerate_pixels(raw_pixels)
     
     # Extract blobs
     blob_trees = get_blob_tree_nodes_from_pixel_grid(pixel_grid)
     
     # Consolidate blob trees
-    consolidated_blob_tree = consolidate_blob_trees(blob_trees)
+    consolidated_blob_tree = consolidate_blob_trees(blob_trees, num_rows, num_cols)
     
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
     
     # Expand blobs to topography
-    # TODO
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
     
-    # TODO Search path
     
-    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=10, num_blob_buffer_itterations=5)
+    # Link Entities
+    linked_path = get_linked_path(layers)
     
-    problem = LinkerProblem(
-        layers
-    )
+    # Elaborate Path
+    elaborated_path = elaborate_path(layers, linked_path)
+    
+    # Write debug image
+    export_path_to_image(elaborated_path, num_rows, num_cols, "test_output.png")
     
     # TODO Smooth path
     
@@ -41,8 +59,12 @@ def process_image(image_path):
     # TODO Write output
     
 
-def main():
-    pass
+def main(input_args):
+    parser = ArgumentParser(prog='myprogram')
+    parser.add_argument('image', type=str, help='The path of the image to load')
+    args = parser.parse_args(input_args)
+    
+    process_image(args.image)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

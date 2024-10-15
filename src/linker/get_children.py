@@ -114,7 +114,6 @@ def search_for_close_entity_links(problem: GetChildrenProblem, border_is_goal: b
     # print("border_is_goal "+str(border_is_goal))
     # print(problem.start_entity_ref)
     start_points = set()
-    print("Problem size")
     if problem.start_entity_ref.entity_idx is None: # Start on the boarder
         for r in range(problem.get_num_rows()):
             start_points.add((r,0))
