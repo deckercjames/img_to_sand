@@ -3,7 +3,6 @@ from src.path_elaboration.elaborator_blob import convert_topography_to_elaborato
 from src.path_elaboration.elaborator_blob import elaborate_blob
 from src.tree import TreeNode
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
-from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
 
 from src.topography import get_topography_tree_visual
 
@@ -108,15 +107,52 @@ def test_elaborate_blob_basic():
     # Function under test
     recv_elaborated_path = elaborate_blob(linkable_entity, (0,2), None, 2)
     assert recv_elaborated_path is not None
-    print("RECEIVED PATH")
-    print(recv_elaborated_path)
     # Visualize output
     recv_str_rep = helper_get_path_visual(recv_elaborated_path, num_rows, num_cols)
     print(recv_str_rep)
-    print(get_topography_tree_visual(linkable_entity.blob_topography, num_rows, num_cols))
-    assert False
+    # Define expected behavior
+    exp_str_rep = \
+        "+  +  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +\n" \
+        "      |  |                                                                                      |               \n" \
+        "+  +  +  +--+  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+  +--+--+  +  +  +\n" \
+        "      |     |                             |                                                  |        |         \n" \
+        "+--+--+  +  +--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+  +--+--+  +\n" \
+        "|           |  |                                                                                   |        |   \n" \
+        "+  +  +  +  +  +--+  +  +  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +--+--+  +  +\n" \
+        "|           |     |        |                                                           |                 |  |   \n" \
+        "+  +  +--+--+  +  +--+--+--+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+  +  +  +  +  +  +\n" \
+        "|     |           |  |                                                                       |           |  |   \n" \
+        "+  +  +  +  +  +  +  +--+  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +--+\n" \
+        "|     |           |     |  |                                                     |           |           |     |\n" \
+        "+  +  +  +  +--+--+  +  +--+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+  +  +  +  +--+--+  +  +\n" \
+        "|     |     |           |  |                                                           |     |     |           |\n" \
+        "+  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +--+--+--+\n" \
+        "|     |     |           |     |                                            |           |     |     |  |         \n" \
+        "+  +  +  +  +  +  +  +--+  +  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+  +--+--+  +  +  +  +  +  +  +  +  +  +\n" \
+        "|     |     |        |        |                                         |        |     |     |     |  |         \n" \
+        "+  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+  +  +  +--+--+  +  +  +  +  +  +  +  +  +  +  +\n" \
+        "|     |     |        |                                         |              |  |     |     |     |  |         \n" \
+        "+  +  +  +  +--+  +  +--+  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+  +  +  +  +  +  +  +  +  +  +  +\n" \
+        "|     |        |        |                                                        |     |     |     |  |         \n" \
+        "+  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +--+  +  +  +  +  +  +  +  +  +  +\n" \
+        "|     |        |                                         |                    |        |     |     |  |         \n" \
+        "+  +  +--+  +  +--+  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +--+--+--+\n" \
+        "|        |        |                                                                    |     |     |           |\n" \
+        "+  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +--+--+--+--+  +  +  +  +--+--+--+  +\n" \
+        "|        |                                         |                       |                 |              |  |\n" \
+        "+--+  +  +--+  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +  +  +  +\n" \
+        "   |        |                                                                                |              |  |\n" \
+        "+  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+  +  +  +  +  +  +\n" \
+        "   |                                         |                             |                                |  |\n" \
+        "+  +--+  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +  +--+  +\n" \
+        "      |                                                                                                  |     |\n" \
+        "+  +  +--+--+--+--+--+--+--+--+--+--+--+  +  +  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+  +--+\n" \
+        "                                       |                                   |                                |   \n" \
+        "+  +  +  +  +  +  +  +  +  +  +  +  +  +--+--+--+--+--+--+--+--+--+--+--+--+  +--+--+--+--+--+--+--+--+--+--+  +\n"
+    # Validate
+    assert recv_str_rep == exp_str_rep
 
-
+# TODO reenable. Maybe fix intermediat blob with long tail
 # def test_elaborate_blob_basic():
 #     test_mask_str_rep = [
 #         "  ##############################     ",
