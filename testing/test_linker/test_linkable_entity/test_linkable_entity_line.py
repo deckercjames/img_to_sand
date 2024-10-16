@@ -34,7 +34,7 @@ def test_linkable_entity_line_basic():
     ]
     test_grid_mask = helper_mask_string_to_bool_mask(test_grid_mask_str)
     exp_test_grid_mask_unchanged = deepcopy(test_grid_mask)
-    recv_linkable_entity = get_line_linkable_entity(test_grid_mask, spacing=None) # spacing not used for this test
+    recv_linkable_entity = get_line_linkable_entity(test_grid_mask) # spacing not used for this test
     exp_end_points = [(3,19), (5,6)]
     assert type(recv_linkable_entity) == LinkableEntityLine
     assert recv_linkable_entity.get_entry_points() == exp_end_points
@@ -43,6 +43,7 @@ def test_linkable_entity_line_basic():
     assert test_grid_mask == exp_test_grid_mask_unchanged
 
 
+# TODO These are kinda verifying the same thing now that the spacing optional has been removed
 def test_linkable_entity_closed_loop():
     test_grid_mask_str = [
         "                  ",
@@ -56,17 +57,17 @@ def test_linkable_entity_closed_loop():
     ]
     test_grid_mask = helper_mask_string_to_bool_mask(test_grid_mask_str)
     exp_test_grid_mask_unchanged = deepcopy(test_grid_mask)
-    recv_linkable_entity = get_line_linkable_entity(test_grid_mask, 5)
+    recv_linkable_entity = get_line_linkable_entity(test_grid_mask)
     recv_entry_pts_str = helper_get_mask_with_gateway_points_as_str(test_grid_mask, recv_linkable_entity.get_entry_points())
     recv_exit_pts_str = helper_get_mask_with_gateway_points_as_str(test_grid_mask, recv_linkable_entity.get_exit_points())
     exp_end_str_rep = \
         "                  \n" \
-        "  #....#...       \n" \
-        " .         .#...  \n" \
-        " .              . \n" \
-        "  .           ##  \n" \
-        "   .#..      .    \n" \
-        "       ..#...     \n" \
+        "  #########       \n" \
+        " #         #####  \n" \
+        " #              # \n" \
+        "  #           ##  \n" \
+        "   ####      #    \n" \
+        "       ######     \n" \
         "                  \n"
     print("RECEIVED")
     print(recv_entry_pts_str)
@@ -88,16 +89,16 @@ def test_linkable_entity_closed_loops_at_border():
     ]
     test_grid_mask = helper_mask_string_to_bool_mask(test_grid_mask_str)
     exp_test_grid_mask_unchanged = deepcopy(test_grid_mask)
-    recv_linkable_entity = get_line_linkable_entity(test_grid_mask, 5)
+    recv_linkable_entity = get_line_linkable_entity(test_grid_mask)
     recv_entry_pts_str = helper_get_mask_with_gateway_points_as_str(test_grid_mask, recv_linkable_entity.get_entry_points())
     recv_exit_pts_str = helper_get_mask_with_gateway_points_as_str(test_grid_mask, recv_linkable_entity.get_exit_points())
     exp_end_str_rep = \
-        " #....#.. .      \n" \
-        ".        . #.... \n" \
-        ".        .      #\n" \
-        " ..      #    .. \n" \
-        "   #...  .   #   \n" \
-        "       .# ...    \n"
+        " ######## #      \n" \
+        "#        # ##### \n" \
+        "#        #      #\n" \
+        " ##      #    ## \n" \
+        "   ####  #   #   \n" \
+        "       ## ###    \n"
     print("RECEIVED")
     print(recv_entry_pts_str)
     assert type(recv_linkable_entity) == LinkableEntityLine

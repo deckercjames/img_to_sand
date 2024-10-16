@@ -39,28 +39,28 @@ def test_linkable_entity_blob_basic():
     test_blobs = get_all_blobs_from_mask(test_grid_mask)
     assert len(test_blobs) == 1
     # Test Function
-    recv_linkable_entity = get_blob_linkable_entity(test_blobs[0], spacing=4)
+    recv_linkable_entity = get_blob_linkable_entity(test_blobs[0])
     recv_entry_pts_str = helper_get_mask_with_gateway_points_as_str(test_grid_mask, recv_linkable_entity.get_entry_points())
     recv_exit_pts_str = helper_get_mask_with_gateway_points_as_str(test_grid_mask, recv_linkable_entity.get_exit_points())
     # Define Exected Output
     exp_entry_str_rep = \
         "              \n" \
-        "  #...#...#   \n" \
-        " ...........  \n" \
-        " ...#...#...# \n" \
-        " #.....#..... \n" \
-        "  ........... \n" \
-        "   #...  #   #\n" \
-        "      #       \n"
+        "  ##########  \n" \
+        " ##........## \n" \
+        " #..######..##\n" \
+        " ##.######...#\n" \
+        "  #..........#\n" \
+        "  ##...#######\n" \
+        "   #####      \n"
     exp_exit_str_rep = \
         "              \n" \
-        "  #...#...#   \n" \
-        " ...........  \n" \
-        " ...........# \n" \
-        " #........... \n" \
-        "  ........... \n" \
-        "   #...  #   #\n" \
-        "      #       \n"
+        "  ##########  \n" \
+        " ##........## \n" \
+        " #..........##\n" \
+        " ##..........#\n" \
+        "  #..........#\n" \
+        "  ##...#######\n" \
+        "   #####      \n"
     exp_end_points = [(3,19), (5,6)]
     # Assert
     print("RECEIVED ENTRY POINTS")
@@ -72,3 +72,4 @@ def test_linkable_entity_blob_basic():
     assert recv_exit_pts_str == exp_exit_str_rep
     assert recv_linkable_entity.get_entity_grid_mask() == exp_test_grid_mask_unchanged
     assert test_grid_mask == exp_test_grid_mask_unchanged
+

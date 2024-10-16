@@ -46,7 +46,7 @@ def test_get_all_layer_strats_basic():
     ]
     blob_layers = helper_get_blob_layers(pixel_grid_str)
     # Call function under test
-    recv_layer_strats = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=4)
+    recv_layer_strats = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
     # Define expected output
     exp_layer_ent_0 = \
         "                  \n" \
@@ -84,7 +84,7 @@ def test_get_all_layer_strats_complex():
     ]
     blob_layers = helper_get_blob_layers(pixel_grid_str)
     # Call function under test
-    recv_layer_strats = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=4)
+    recv_layer_strats = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
     # Define expected output
     exp_layer_ent_l0_e0 = [
         "                              ",
@@ -167,7 +167,7 @@ def test_get_all_layer_strats_complex2():
     ]
     blob_layers = helper_get_blob_layers(pixel_grid_str)
     # Call function under test
-    recv_layer_strats = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=2, num_blob_buffer_itterations=0, gateway_point_spacing=4)
+    recv_layer_strats = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=2, num_blob_buffer_itterations=0)
     # Define expected output
     exp_layer_ent_0 = [
         "                                       ",

@@ -34,7 +34,7 @@ def helper_get_layers(pixel_grid_str, num_line_errosions=0):
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
     
-    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_errosions, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_errosions, num_blob_buffer_itterations=0)
     
     total_image_mask = [[c != ' ' for c in line] for line in pixel_grid_str]
 

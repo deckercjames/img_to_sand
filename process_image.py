@@ -51,7 +51,7 @@ def process_image(image_path):
     logging.info("Unwrapped blob tree.")
     
     # Expand blobs to topography
-    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
     logging.info("Compiled layers.")
     
     # Link Entities

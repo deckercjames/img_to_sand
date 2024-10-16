@@ -10,6 +10,6 @@ def export_path_to_image(path, num_rows, num_cols, output_file_path):
     path = [(c,r) for r,c in path]
     
     img_draw = ImageDraw.Draw(img)   
-    img_draw.line(path, fill="yellow", width = 0)
+    img_draw.line(path, fill="#baa800", width = 0)
     
     img.save(output_file_path)

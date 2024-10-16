@@ -103,7 +103,7 @@ def test_elaborate_blob_basic():
     num_rows = len(test_mask_str_rep)
     num_cols = len(test_mask_str_rep[0])
     blob = helper_blob_from_str_rep(test_mask_str_rep)
-    linkable_entity = get_blob_linkable_entity(blob, 1)
+    linkable_entity = get_blob_linkable_entity(blob)
     # Function under test
     recv_elaborated_path = elaborate_blob(linkable_entity, (0,2), None, 2)
     assert recv_elaborated_path is not None

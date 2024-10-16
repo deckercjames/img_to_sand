@@ -39,7 +39,7 @@ def helper_get_layers(pixel_grid_str, num_line_erosions=0):
     # Unwrap consolidated blob tree
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
 
-    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_erosions, num_blob_buffer_itterations=0, gateway_point_spacing=1)
+    return get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_erosions, num_blob_buffer_itterations=0)
 
 
 def helper_print_path_item(layers, path_item: PathItem):

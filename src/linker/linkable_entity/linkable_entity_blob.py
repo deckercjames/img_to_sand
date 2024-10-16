@@ -26,27 +26,25 @@ class LinkableEntityBlob(LinkableEntity):
 
 
 
-def get_leaf_entry_points(blob_topography: TreeNode, spacing: int):
+def get_leaf_entry_points(blob_topography: TreeNode):
     
     if len(blob_topography.children) == 0:
-        return blob_topography.node_data[::spacing]
+        return blob_topography.node_data
     
     leaf_entry_points = []
     
     for child in blob_topography.children:
-        leaf_entry_points.extend(get_leaf_entry_points(child, spacing))
+        leaf_entry_points.extend(get_leaf_entry_points(child))
     
     return leaf_entry_points
     
 
 
-def get_blob_linkable_entity(blob: Blob, spacing: int):
-    if spacing <= 0:
-        raise Exception("Spacing must be a positive integer!")
-    exit_points = blob.outer_contour[::spacing]
+def get_blob_linkable_entity(blob: Blob):
+    exit_points = blob.outer_contour
     blob_topography = get_blob_topography(blob)
     # print(get_topography_tree_visual(blob_topography, len(blob.mask), len(blob.mask[0])))
-    entry_points = get_leaf_entry_points(blob_topography, spacing)
+    entry_points = get_leaf_entry_points(blob_topography)
     if blob_topography.children != 0:
-        entry_points.extend(blob_topography.node_data[::spacing])
+        entry_points.extend(blob_topography.node_data)
     return LinkableEntityBlob(blob, blob_topography, entry_points, exit_points)

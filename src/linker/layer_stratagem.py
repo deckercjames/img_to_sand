@@ -37,7 +37,7 @@ def get_all_separate_grid_masks(grid_mask):
     return separate_grid_masks
 
 
-def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itterations, num_blob_buffer_itterations, gateway_point_spacing):
+def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itterations, num_blob_buffer_itterations):
     
     all_linkable_entities = []
     
@@ -56,7 +56,7 @@ def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itter
         # print("num lines "+str(len(line_grid_masks)))
         for line_grid_mask in line_grid_masks:
             # print("line itter")
-            all_linkable_entities.append(get_line_linkable_entity(line_grid_mask, gateway_point_spacing))
+            all_linkable_entities.append(get_line_linkable_entity(line_grid_mask))
         
         # Handle micro blobs from blob
         for _ in range(num_blob_buffer_itterations):
@@ -69,18 +69,18 @@ def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itter
         # print("num micro blobs "+str(len(micro_blobs)))
         for micro_blob in micro_blobs:
             # print("blob itter")
-            all_linkable_entities.append(get_blob_linkable_entity(micro_blob, gateway_point_spacing))
+            all_linkable_entities.append(get_blob_linkable_entity(micro_blob))
     
     return all_linkable_entities
 
 
-def get_all_layer_stratagem(blob_layers, num_line_errosion_itterations, num_blob_buffer_itterations, gateway_point_spacing) -> List[List[LinkableEntity]]:
+def get_all_layer_stratagem(blob_layers, num_line_errosion_itterations, num_blob_buffer_itterations) -> List[List[LinkableEntity]]:
     
     layer_stratagems = []
 
     for blobs_in_layer in blob_layers:
         # get all linkable entities
-        layer_linkable_entities = get_all_linkable_entities_for_blob_layer(blobs_in_layer, num_line_errosion_itterations, num_blob_buffer_itterations, gateway_point_spacing)
+        layer_linkable_entities = get_all_linkable_entities_for_blob_layer(blobs_in_layer, num_line_errosion_itterations, num_blob_buffer_itterations)
         # Add layer stratagem to list
         layer_stratagems.append(layer_linkable_entities)
     
