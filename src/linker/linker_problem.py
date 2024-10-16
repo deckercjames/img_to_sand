@@ -38,6 +38,10 @@ class LinkerSearchState:
     path: List[PathItem]
     def __lt__(self, other):
         return True
+    def __eq__(self, other):
+        return self.cur_entity_ref == other.cur_entity_ref and self.visited_layer_entity_idx_set == other.visited_layer_entity_idx_set
+    def __hash__(self):
+        return self.cur_entity_ref.layer_idx * 971 + (self.cur_entity_ref.entity_idx if self.cur_entity_ref.entity_idx else 900)
 """
 cur_entity_ref (EntityReference): contains the layer index, entity_index of the current entity. None means edge
 visited_mask (gridmask): The union of all masks of visited entities. This prevents us from making a link that

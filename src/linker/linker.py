@@ -14,6 +14,7 @@ from src.linker.get_children import get_child_states
 from src.linker.linker_problem import *
 
 from src.pbar import ProgressBar
+from src.visual_debugger import dump_linker_open_list
 
 
 entity_link_cache = {}
@@ -45,8 +46,9 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
     heapq.heappush(fringe, (0, start_state))
     
     pbar = ProgressBar(problem.get_total_num_entities_to_link() * 2)
-    
     itter_cnt = 0
+    dump_linker_open_list(problem, fringe, itter_cnt)
+    
     while True:
         next_fringe = []
         
@@ -76,8 +78,15 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
                 heapq.heappush(next_fringe, (new_f, child_state))
             
         # Enforce beam limit
+        visited_this_search_level = set()
         while len(next_fringe) > 0 and len(fringe) < beam_width:
-            heapq.heappush(fringe, heapq.heappop(next_fringe))
+            fringe_item = heapq.heappop(next_fringe)
+            if fringe_item in visited_this_search_level:
+                continue
+            heapq.heappush(fringe, fringe_item)
+            visited_this_search_level.add(fringe_item)
+
+        dump_linker_open_list(problem, fringe, itter_cnt)
         
         # Failed to find goal
         if len(fringe) == 0:

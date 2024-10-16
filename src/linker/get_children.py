@@ -74,7 +74,7 @@ def check_reached_new_entity(problem: GetChildrenProblem, state: GetChildrenSear
 
 def check_reached_border(problem: GetChildrenProblem, state: GetChildrenSearchState) -> bool:
     r,c = state.position
-    return r == 0 or r == problem.get_num_rows() + 1 or c == 0 or c == problem.get_num_cols() + 1
+    return r == 0 or r == problem.get_num_rows() or c == 0 or c == problem.get_num_cols()
 
 
 def get_heuristic(problem: GetChildrenProblem, state: GetChildrenSearchState) -> float:

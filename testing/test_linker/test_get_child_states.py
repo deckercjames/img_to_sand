@@ -10,6 +10,7 @@ from src.utils import grid_mask_to_str
 from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
+from copy import deepcopy
 from src.linker.layer_stratagem import get_all_layer_stratagem
 
 def helper_pixel_grid_str_parser(pixel_grid_str):
@@ -19,6 +20,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
             [0 if c == ' ' else int(c) for c in line]
         )
     return pixel_grid
+
 
 def helper_get_layers(pixel_grid_str, num_line_errosions=0):
     pixel_grid = helper_pixel_grid_str_parser(pixel_grid_str)
@@ -40,6 +42,7 @@ def helper_get_layers(pixel_grid_str, num_line_errosions=0):
 
     return layers, total_image_mask
     
+
 def helper_print_path_item(layers, path_item: PathItem):
     assert type(path_item) == PathItem
     num_rows = len(layers[0][0].get_entity_grid_mask())
@@ -355,3 +358,72 @@ def test_get_too_many_child_states_from_entity():
     assert recv_child_states[0] == exp_child_states[0]
     assert recv_child_states[1] == exp_child_states[1]
 
+
+def test_get_child_states_entity_to_SE_border():
+    pixel_grid_str = [
+        "                  ",
+        "                  ",
+        "    111           ",
+        "    111           ",
+        "                  ",
+        "                  ",
+        "          222222  ",
+        "           22222  ",
+        "          2222222 ",
+        "                  ",
+    ]
+    layers, total_image_mask = helper_get_layers(pixel_grid_str)
+    print("LAYERS")
+    print(layers)
+    # build the layers with the other code. Assume it to be correct
+    test_problem = LinkerProblem(
+        layers=layers,
+        total_image_mask=total_image_mask,
+        cost_menu=CostMenu(
+            visited_mask_cost=100000,
+            future_mask_cost=0,
+            base_cost=1
+        )
+    )
+    test_state = LinkerSearchState(
+        cur_entity_ref=EntityReference(0, 1),
+        visited_mask=[
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
+                [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
+                [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
+                [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+        ],
+        visited_layer_entity_idx_set={1},
+        cost_to_state=1,
+        path=[]
+    )
+    # Sanity print problem
+    print("Len Layers "+str(len(layers)))
+    print("Len Layers[0] "+str(len(layers[0])))
+    for e in layers[0]:
+        print(grid_mask_to_str(e.get_entity_grid_mask()))
+        print(e.get_entry_points())
+    # Function Under Test
+    recv_child_states = get_child_states(test_problem, test_state, 1)
+    exp_child_states = [
+        LinkerSearchState(
+            cur_entity_ref=EntityReference(0, None),
+            visited_mask=deepcopy(total_image_mask),
+            visited_layer_entity_idx_set={1},
+            cost_to_state=2,
+            path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(1,16), (0,16)], EntityReference(0,None))]
+        ),
+    ]
+    assert len(recv_child_states) == 2
+    # The path to the border will always be the zero-th element
+    assert recv_child_states[0].cur_entity_ref == EntityReference(0, None)
+    assert len(recv_child_states[0].path) == 1
+    # assert that we get the short path to a south/east border
+    # This is to test an issue where the south/east boarder was only counted as a goal at dimention+1, so it could never be reached
+    assert len(recv_child_states[0].path[-1].entity_linkage_points) == 2
