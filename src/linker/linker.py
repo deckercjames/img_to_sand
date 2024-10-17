@@ -48,7 +48,8 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
         
         itter_cnt += 1
         # print(itter_cnt, problem.get_total_num_entities_to_link())
-        pbar.update()
+        
+        pbar.push_subproblem(len(fringe))
         
         while len(fringe) > 0:
             
@@ -59,7 +60,6 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
             # print("  current_entity_ref: {}".format(str(current_state.cur_entity_ref)))
             # print("  visited_layer_entity_idx_set: {}".format(str(current_state.visited_layer_entity_idx_set)))
             # print("  ...\n}")
-    
             
             # Check goal state
             if is_goal_state(problem, current_state):
@@ -70,6 +70,10 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
             for child_state in get_child_states(problem, current_state, max_children_pre_expansion):
                 new_f = child_state.cost_to_state + get_heuristic_for_state(problem, child_state)
                 heapq.heappush(next_fringe, (new_f, child_state))
+                
+            pbar.update()
+        
+        pbar.complete_subproblem()
             
         # Enforce beam limit
         visited_this_search_level = set()
@@ -81,6 +85,8 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
             visited_this_search_level.add(fringe_item)
 
         dump_linker_open_list(problem, fringe, itter_cnt)
+
+        pbar.update()
         
         # Failed to find goal
         if len(fringe) == 0:

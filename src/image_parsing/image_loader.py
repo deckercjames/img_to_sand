@@ -3,8 +3,9 @@ from PIL import Image
 
 from src.utils import check_grid_element_safe
 from src.utils import get_grid_mask_union
-from src.utils import grid_mask_to_str
 
+import logging
+import sys
 
 def load_image(image_path):
     
@@ -18,9 +19,9 @@ def load_image(image_path):
                     # print(image_fp.getpixel((c, r)))
                     pixel_row.append(image_fp.getpixel((c, r)))
                 pixels.append(pixel_row)
-    except OSError:
-        print("Fail")
-        return
+    except OSError as e:
+        logging.fatal("Could not load image '{}'. {}".format(image_path, e))
+        sys.exit(1)
         
     # print("Got image {}x{}", image_height, image_width)
     

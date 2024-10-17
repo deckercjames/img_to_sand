@@ -6,7 +6,6 @@ from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_gri
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
-from src.linker.linker import LinkerProblem
 from src.image_parsing.image_loader import load_image
 from src.image_parsing.image_loader import enumerate_pixels
 from src.linker.linker import get_linked_path
@@ -14,57 +13,77 @@ from src.path_elaboration.elaborator import elaborate_path
 from src.visualizer.visual_debugger import export_path_to_image
 
 import logging
-import sys
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
+class CustomFormatter(logging.Formatter):
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
-handler.setFormatter(formatter)
-root.addHandler(handler)
+    grey = "\x1b[38;20m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format = "%(asctime)s | %(levelname)-8s | %(message)s"
 
-def process_image(image_path):
+    FORMATS = {
+        logging.DEBUG: grey + format + reset,
+        logging.INFO: grey + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: bold_red + format + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+logger_root = logging.getLogger()
+logger_root.setLevel(logging.DEBUG)
+
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.INFO)
+stdout_handler.setFormatter(CustomFormatter())
+logger_root.addHandler(stdout_handler)
+
+def process_image(input_image_path, output_visualizer_path):
     
-    # Load imagee
-    raw_pixels = load_image(image_path)
-    logging.info("Image loaded.")
+    # Load image
+    logging.info("Loading image...")
+    raw_pixels = load_image(input_image_path)
     
     num_rows = len(raw_pixels)
     num_cols = len(raw_pixels[0])
     
     # Cluster like colors
+    logging.info("Enumerating pixels...")
     pixel_grid = enumerate_pixels(raw_pixels)
-    logging.info("Enumerated pixels.")
     
     # Extract blobs
+    logging.info("Extracting blobs...")
     blob_trees = get_blob_tree_nodes_from_pixel_grid(pixel_grid)
-    logging.info("Extracted blobs.")
     
     # Consolidate blob trees
+    logging.info("Consolidating blob trees...")
     consolidated_blob_tree = consolidate_blob_trees(blob_trees, num_rows, num_cols)
-    logging.info("Consolidated blob trees.")
     
     # Unwrap consolidated blob tree
+    logging.info("Unwrapping consolidated blob tree..")
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
-    logging.info("Unwrapped blob tree.")
     
     # Expand blobs to topography
+    logging.info("Compiling layers...")
     layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
-    logging.info("Compiled layers.")
     
     # Link Entities
     logging.info("Linking entities...")
     linked_path = get_linked_path(layers)
-    logging.info("Entities linked.")
     
     # Elaborate Path
+    logging.info("Elaborating path...")
     elaborated_path = elaborate_path(layers, linked_path)
-    logging.info("Path elaborated.")
     
     # Write debug image
-    export_path_to_image(elaborated_path, num_rows, num_cols, "test_output.png")
+    logging.info("Writing visual path to '{}'".format(output_visualizer_path))
+    export_path_to_image(elaborated_path, num_rows, num_cols, output_visualizer_path)
     
     # TODO Smooth path
     
@@ -79,10 +98,12 @@ def main(input_args):
     args = parser.parse_args(input_args)
     
     try:
-        process_image(args.image)
+        process_image(args.image, "output.png")
     except KeyboardInterrupt:
         print("")
-        logging.info("Keyboard Interupt Received")
+        logging.info("Keyboard Interupt Received.")
+    
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

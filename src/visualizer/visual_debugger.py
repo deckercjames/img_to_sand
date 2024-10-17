@@ -2,11 +2,11 @@
 from PIL import Image, ImageDraw
 
 from src.linker.linker_problem import LinkerProblem
-from src.linker.linker_problem import PathItem
 from src.linker.linker_problem import LinkerSearchState
 from typing import List
 import os
 
+import logging
 
 def dump_linker_open_list(problem: LinkerProblem, open_list: List[LinkerSearchState], itteration: int):
     
@@ -56,8 +56,6 @@ def dump_linker_open_list(problem: LinkerProblem, open_list: List[LinkerSearchSt
         
         img.save("{}/state_cost_{:05}+{:02}_.png".format(dir, int(search_state.cost_to_state), i))
         
-    
-    pass
 
 
 def export_path_to_image(path, num_rows, num_cols, output_file_path):
@@ -70,4 +68,7 @@ def export_path_to_image(path, num_rows, num_cols, output_file_path):
     img_draw = ImageDraw.Draw(img)   
     img_draw.line(path, fill="#baa800", width = 0)
     
-    img.save(output_file_path)
+    try:
+        img.save(output_file_path)
+    except OSError as err:
+        logging.error("Failed to write visualizer output '{}'. {}".format(path, err))
