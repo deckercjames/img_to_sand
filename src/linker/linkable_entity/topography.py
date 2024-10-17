@@ -1,17 +1,12 @@
 
-from src.utils import check_grid_element_safe
-from src.blob_extraction import get_blob_mask_outer_contour
-from src.blob_extraction import get_total_blob_mask
-from src.zhang_suen import zhang_suen_errosion_itteration
-from src.blob_extraction import Blob
+from src.image_parsing.blob_extraction import get_blob_mask_outer_contour
+from src.image_parsing.blob_extraction import get_total_blob_mask
+from src.image_parsing.blob_extraction import Blob
 from src.utils import get_grid_mask_subtraction
 from src.utils import get_grid_mask_union
-from src.utils import grid_mask_to_str
 from src.utils import check_mask_intersection
 from src.utils import get_list_element_cyclic
 from src.utils import get_mask_with_inward_bleed
-from copy import deepcopy
-from collections import namedtuple
 from src.tree import TreeNode
 
 

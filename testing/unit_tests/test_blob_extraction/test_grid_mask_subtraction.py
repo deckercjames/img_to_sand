@@ -1,5 +1,5 @@
 
-from src.blob_extraction import get_grid_mask_subtraction
+from src.image_parsing.blob_extraction import get_grid_mask_subtraction
 from copy import deepcopy
 
 

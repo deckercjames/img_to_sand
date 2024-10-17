@@ -1,6 +1,5 @@
 
-from src.zhang_suen import zhang_suen_errosion
-from src.zhang_suen import zhang_suen_errosion_itteration
+from src.linker.zhang_suen import zhang_suen_errosion
 
 from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
 from testing.unit_tests.testing_helpers import helper_grid_mask_to_string

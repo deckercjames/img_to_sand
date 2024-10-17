@@ -1,6 +1,6 @@
 
-from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
-from src.blob_extraction import Blob
+from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_grid
+from src.image_parsing.blob_extraction import Blob
 from src.tree import TreeNode
 from copy import deepcopy
 

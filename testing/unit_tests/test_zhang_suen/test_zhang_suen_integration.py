@@ -1,8 +1,7 @@
 
-from src.zhang_suen import get_split_lines_and_blobs
+from src.linker.zhang_suen import get_split_lines_and_blobs
 
 from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
-from testing.unit_tests.testing_helpers import helper_grid_mask_to_string
 from testing.unit_tests.testing_helpers import helper_pretty_mask_compare
 
 

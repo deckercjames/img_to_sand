@@ -1,6 +1,6 @@
 
-from src.topography import get_all_blobs_from_mask
-from src.blob_extraction import Blob
+from src.linker.linkable_entity.topography import get_all_blobs_from_mask
+from src.image_parsing.blob_extraction import Blob
 from copy import deepcopy
 
 

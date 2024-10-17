@@ -1,10 +1,5 @@
 
-from src.linker.linker import get_child_states
-from src.linker.linker import LinkerProblem
-from src.linker.linker import CostMenu
-from src.linker.linker import LinkerSearchState
-from src.utils import get_all_false_mask
-from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
+from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_grid
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem

@@ -1,5 +1,5 @@
 
-from src.topography import get_flood_fill_grid_mask
+from src.linker.linkable_entity.topography import get_flood_fill_grid_mask
 from copy import deepcopy
 
 def test_grid_mask_flood_fill_basic():

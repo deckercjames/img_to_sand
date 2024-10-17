@@ -3,12 +3,7 @@ from src.path_elaboration.elaborator_blob import convert_topography_to_elaborato
 from src.path_elaboration.elaborator_blob import elaborate_blob
 from src.tree import TreeNode
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
-
-from src.topography import get_topography_tree_visual
-
-from src.topography import get_blob_topography
-from src.topography import get_all_blobs_from_mask
-from src.topography import get_topography_tree_visual
+from src.linker.linkable_entity.topography import get_all_blobs_from_mask
 from src.tree import TreeNode
 
 def helper_blob_from_str_rep(str_rep):

@@ -1,9 +1,9 @@
 
 
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
-from src.blob_extraction import Blob
-from src.topography import get_blob_topography
-from src.topography import get_topography_tree_visual
+from src.image_parsing.blob_extraction import Blob
+from src.linker.linkable_entity.topography import get_blob_topography
+from src.linker.linkable_entity.topography import get_topography_tree_visual
 from src.tree import TreeNode
 
 class LinkableEntityBlob(LinkableEntity):

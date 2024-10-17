@@ -7,7 +7,7 @@ from src.linker.linker import PathItem
 from src.linker.linker import EntityReference
 from src.utils import get_all_false_mask
 from src.utils import grid_mask_to_str
-from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
+from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_grid
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from copy import deepcopy

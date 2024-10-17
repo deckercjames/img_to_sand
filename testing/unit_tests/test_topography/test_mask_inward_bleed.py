@@ -1,6 +1,6 @@
 
 
-from src.topography import get_mask_with_inward_bleed
+from src.linker.linkable_entity.topography import get_mask_with_inward_bleed
 from copy import deepcopy
 
 

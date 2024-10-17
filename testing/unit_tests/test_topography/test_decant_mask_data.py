@@ -1,7 +1,7 @@
 
-from src.topography import decant_mask_data_from_topography_tree
+from src.linker.linkable_entity.topography import decant_mask_data_from_topography_tree
 from src.tree import TreeNode
-from src.blob_extraction import Blob
+from src.image_parsing.blob_extraction import Blob
 
 
 def test_decant_basic():

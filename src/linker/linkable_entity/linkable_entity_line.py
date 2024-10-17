@@ -1,9 +1,7 @@
 
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
-from src.utils import check_grid_element_safe
-from src.zhang_suen import _get_neighbours
+from src.linker.zhang_suen import _get_neighbours
 from typing import List
-from collections import deque
 
 
 class LinkableEntityLine(LinkableEntity):

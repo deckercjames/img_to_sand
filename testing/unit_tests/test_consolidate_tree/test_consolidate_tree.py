@@ -1,7 +1,7 @@
 
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import TreeNode
-from src.blob_extraction import Blob
+from src.image_parsing.blob_extraction import Blob
 
 def test_consol_tree_empy_list():
     test_blob_trees = []

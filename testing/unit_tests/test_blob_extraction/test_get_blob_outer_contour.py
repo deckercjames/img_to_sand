@@ -1,5 +1,5 @@
 
-from src.blob_extraction import get_blob_mask_outer_contour
+from src.image_parsing.blob_extraction import get_blob_mask_outer_contour
 from copy import deepcopy
 
 

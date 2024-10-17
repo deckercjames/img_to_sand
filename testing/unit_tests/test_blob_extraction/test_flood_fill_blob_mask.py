@@ -1,5 +1,5 @@
 
-from src.blob_extraction import get_flood_fill_blob_mask
+from src.image_parsing.blob_extraction import get_flood_fill_blob_mask
 from copy import deepcopy
 
 def test_pixel_flood_fill_basic():

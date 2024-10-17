@@ -1,20 +1,12 @@
 
-
-from collections import namedtuple
-
-from src.zhang_suen import get_split_lines_and_blobs
-from src.utils import get_all_false_mask
-from src.utils import get_grid_mask_union
+from src.linker.zhang_suen import get_split_lines_and_blobs
 from src.utils import get_grid_mask_subtraction
-from src.topography import get_mask_with_inward_bleed
-from src.topography import get_all_blobs_from_mask
-from src.blob_extraction import get_flood_fill_blob_mask
-from src.utils import grid_mask_to_str
+from src.linker.linkable_entity.topography import get_mask_with_inward_bleed
+from src.linker.linkable_entity.topography import get_all_blobs_from_mask
 from src.linker.linkable_entity.linkable_entity_line import get_line_linkable_entity
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
-from dataclasses import dataclass
-from typing import List, Set
-from src.topography import get_flood_fill_grid_mask
+from typing import List
+from src.linker.linkable_entity.topography import get_flood_fill_grid_mask
 
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
 

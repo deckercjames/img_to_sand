@@ -2,16 +2,16 @@
 import sys
 from argparse import ArgumentParser
 
-from src.blob_extraction import get_blob_tree_nodes_from_pixel_grid
+from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_grid
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
 from src.linker.linker import LinkerProblem
-from src.image_loader import load_image
-from src.image_loader import enumerate_pixels
+from src.image_parsing.image_loader import load_image
+from src.image_parsing.image_loader import enumerate_pixels
 from src.linker.linker import get_linked_path
 from src.path_elaboration.elaborator import elaborate_path
-from src.visual_debugger import export_path_to_image
+from src.visualizer.visual_debugger import export_path_to_image
 
 import logging
 import sys
