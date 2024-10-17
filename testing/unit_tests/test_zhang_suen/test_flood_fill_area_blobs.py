@@ -1,8 +1,8 @@
 
 from src.zhang_suen import get_flood_fill_area_blobs
 
-from testing.testing_helpers import helper_mask_string_to_bool_mask
-from testing.testing_helpers import helper_grid_mask_to_string
+from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
+from testing.unit_tests.testing_helpers import helper_grid_mask_to_string
 
 
 def test_get_area_blobs():

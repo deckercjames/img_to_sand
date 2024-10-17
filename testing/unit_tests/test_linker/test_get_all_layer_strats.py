@@ -10,8 +10,8 @@ from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
 from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
 from src.linker.linkable_entity.linkable_entity_line import LinkableEntityLine
-from testing.testing_helpers import helper_grid_mask_to_string
-from testing.testing_helpers import helper_pretty_mask_compare
+from testing.unit_tests.testing_helpers import helper_grid_mask_to_string
+from testing.unit_tests.testing_helpers import helper_pretty_mask_compare
 
 def helper_pixel_grid_str_parser(pixel_grid_str):
     pixel_grid = []

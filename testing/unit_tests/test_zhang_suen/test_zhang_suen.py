@@ -2,8 +2,8 @@
 from src.zhang_suen import zhang_suen_errosion
 from src.zhang_suen import zhang_suen_errosion_itteration
 
-from testing.testing_helpers import helper_mask_string_to_bool_mask
-from testing.testing_helpers import helper_grid_mask_to_string
+from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
+from testing.unit_tests.testing_helpers import helper_grid_mask_to_string
 
 def test_zhang_suen_basic():
     test_mask_str = [

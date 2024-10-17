@@ -3,7 +3,7 @@ from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
 from src.topography import get_all_blobs_from_mask
 
-from testing.testing_helpers import helper_mask_string_to_bool_mask
+from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
 
 from copy import deepcopy
 

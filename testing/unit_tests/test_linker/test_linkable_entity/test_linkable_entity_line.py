@@ -2,7 +2,7 @@
 from src.linker.linkable_entity.linkable_entity_line import LinkableEntityLine
 from src.linker.linkable_entity.linkable_entity_line import get_line_linkable_entity
 
-from testing.testing_helpers import helper_mask_string_to_bool_mask
+from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
 
 from copy import deepcopy
 
