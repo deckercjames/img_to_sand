@@ -17,6 +17,12 @@ class TreeNode:
         print("    "*indent + str(self.node_data))
         for child in self.children:
             child.print_tree(indent+1)
+    
+    def count_nodes(self):
+        count = 1
+        for child in self.children:
+            count += child.count_nodes()
+        return count
 
 
 def unwrap_tree_post_order_traversal(root):

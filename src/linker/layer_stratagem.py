@@ -7,6 +7,7 @@ from src.linker.linkable_entity.linkable_entity_line import get_line_linkable_en
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
 from typing import List
 from src.linker.linkable_entity.topography import get_flood_fill_grid_mask
+from src.pbar import ProgressBar
 
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
 
@@ -29,9 +30,11 @@ def get_all_separate_grid_masks(grid_mask):
     return separate_grid_masks
 
 
-def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itterations, num_blob_buffer_itterations):
+def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itterations: int, num_blob_buffer_itterations: int, pbar: ProgressBar):
     
     all_linkable_entities = []
+    
+    pbar.push_subproblem(len(blob_layer))
     
     for blob in blob_layer:
         micro_blobs_grid_mask, lines_grid_mask = get_split_lines_and_blobs(blob.mask, num_line_errosion_itterations)
@@ -62,19 +65,28 @@ def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itter
         for micro_blob in micro_blobs:
             # print("blob itter")
             all_linkable_entities.append(get_blob_linkable_entity(micro_blob))
+        
+        pbar.update()
+    
+    pbar.complete_subproblem()
     
     return all_linkable_entities
 
 
-def get_all_layer_stratagem(blob_layers, num_line_errosion_itterations, num_blob_buffer_itterations) -> List[List[LinkableEntity]]:
+def get_all_layer_stratagem(blob_layers, num_line_errosion_itterations: int, num_blob_buffer_itterations: int) -> List[List[LinkableEntity]]:
     
     layer_stratagems = []
+    
+    pbar = ProgressBar(len(blob_layers))
 
     for blobs_in_layer in blob_layers:
         # get all linkable entities
-        layer_linkable_entities = get_all_linkable_entities_for_blob_layer(blobs_in_layer, num_line_errosion_itterations, num_blob_buffer_itterations)
+        layer_linkable_entities = get_all_linkable_entities_for_blob_layer(blobs_in_layer, num_line_errosion_itterations, num_blob_buffer_itterations, pbar)
         # Add layer stratagem to list
         layer_stratagems.append(layer_linkable_entities)
+        pbar.update()
+    
+    pbar.complete()
     
     # must reverse the layers before returning them since they were build backward
     return layer_stratagems

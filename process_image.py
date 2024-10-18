@@ -40,7 +40,7 @@ logger_root = logging.getLogger()
 logger_root.setLevel(logging.DEBUG)
 
 stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.INFO)
+stdout_handler.setLevel(logging.DEBUG)
 stdout_handler.setFormatter(CustomFormatter())
 logger_root.addHandler(stdout_handler)
 
@@ -60,6 +60,7 @@ def process_image(input_image_path, output_visualizer_path):
     # Extract blobs
     logging.info("Extracting blobs...")
     blob_trees = get_blob_tree_nodes_from_pixel_grid(pixel_grid)
+    logging.debug("Found {} blobs".format(sum([tree.count_nodes() for tree in blob_trees])))
     
     # Consolidate blob trees
     logging.info("Consolidating blob trees...")

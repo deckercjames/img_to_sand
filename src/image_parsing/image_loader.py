@@ -4,6 +4,8 @@ from PIL import Image
 from src.utils import check_grid_element_safe
 from src.utils import get_grid_mask_union
 
+from src.pbar import ProgressBar
+
 import logging
 import sys
 
@@ -92,8 +94,14 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
     
     # print("Enumerating")
     
-    for r in range(len(raw_pixel_grid)):
-        for c in range(len(raw_pixel_grid[0])):
+    num_rows = len(raw_pixel_grid)
+    num_cols = len(raw_pixel_grid[0])
+    
+    pbar = ProgressBar(num_rows*num_cols)
+    
+    for r in range(num_rows):
+        for c in range(num_cols):
+            pbar.update()
             if visited_mask[r][c]:
                 continue
             similar_color_blob_mask = get_flood_fill_blob_mask(raw_pixel_grid, r, c)
@@ -122,6 +130,8 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
             
             if idx != 0:
                 pixel_enumeration_index += 1
+    
+    pbar.complete()
             
     # print(grid_mask_to_str(visited_mask))
     
