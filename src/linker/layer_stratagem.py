@@ -8,6 +8,8 @@ from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_en
 from typing import List
 from src.linker.linkable_entity.topography import get_flood_fill_grid_mask
 from src.pbar import ProgressBar
+from multiprocessing import Queue, Pool, cpu_count
+from threading import Thread
 
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
 
@@ -30,46 +32,58 @@ def get_all_separate_grid_masks(grid_mask):
     return separate_grid_masks
 
 
+def get_linkable_entities_from_blob(blob, num_line_errosion_itterations: int, num_blob_buffer_itterations):
+    
+    linkable_entities_in_blob = []
+    
+    micro_blobs_grid_mask, lines_grid_mask = get_split_lines_and_blobs(blob.mask, num_line_errosion_itterations)
+    
+    # print("ITTER")
+    # print("Current length of all_linkable_entities "+str(len(all_linkable_entities)))
+    # print("micro blobs mask")
+    # print(grid_mask_to_str(micro_blobs_grid_mask))
+    # print("line grid mask")
+    # print(grid_mask_to_str(lines_grid_mask))
+    
+    # Handle lines from blob
+    line_grid_masks = get_all_separate_grid_masks(lines_grid_mask)
+    # print("num lines "+str(len(line_grid_masks)))
+    for line_grid_mask in line_grid_masks:
+        # print("line itter")
+        linkable_entities_in_blob.append(get_line_linkable_entity(line_grid_mask))
+    
+    # Handle micro blobs from blob
+    for _ in range(num_blob_buffer_itterations):
+        micro_blobs_grid_mask = get_mask_with_inward_bleed(micro_blobs_grid_mask, diag_bleed=True)
+    
+    # print("micro blobs mask")
+    # print(grid_mask_to_str(micro_blobs_grid_mask))
+    micro_blobs = get_all_blobs_from_mask(micro_blobs_grid_mask)
+    
+    # print("num micro blobs "+str(len(micro_blobs)))
+    for micro_blob in micro_blobs:
+        # print("blob itter")
+        linkable_entities_in_blob.append(get_blob_linkable_entity(micro_blob))
+        
+    return linkable_entities_in_blob
+
+
 def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itterations: int, num_blob_buffer_itterations: int, pbar: ProgressBar):
     
     all_linkable_entities = []
-    
-    pbar.push_subproblem(len(blob_layer))
+    pool = Pool(processes=(cpu_count() - 1))
+    processes = []
     
     for blob in blob_layer:
-        micro_blobs_grid_mask, lines_grid_mask = get_split_lines_and_blobs(blob.mask, num_line_errosion_itterations)
-        
-        # print("ITTER")
-        # print("Current length of all_linkable_entities "+str(len(all_linkable_entities)))
-        # print("micro blobs mask")
-        # print(grid_mask_to_str(micro_blobs_grid_mask))
-        # print("line grid mask")
-        # print(grid_mask_to_str(lines_grid_mask))
-        
-        # Handle lines from blob
-        line_grid_masks = get_all_separate_grid_masks(lines_grid_mask)
-        # print("num lines "+str(len(line_grid_masks)))
-        for line_grid_mask in line_grid_masks:
-            # print("line itter")
-            all_linkable_entities.append(get_line_linkable_entity(line_grid_mask))
-        
-        # Handle micro blobs from blob
-        for _ in range(num_blob_buffer_itterations):
-            micro_blobs_grid_mask = get_mask_with_inward_bleed(micro_blobs_grid_mask, diag_bleed=True)
-        
-        # print("micro blobs mask")
-        # print(grid_mask_to_str(micro_blobs_grid_mask))
-        micro_blobs = get_all_blobs_from_mask(micro_blobs_grid_mask)
-        
-        # print("num micro blobs "+str(len(micro_blobs)))
-        for micro_blob in micro_blobs:
-            # print("blob itter")
-            all_linkable_entities.append(get_blob_linkable_entity(micro_blob))
-        
-        pbar.update()
+        process = pool.apply_async(func=get_linkable_entities_from_blob, args=(blob, num_line_errosion_itterations, num_blob_buffer_itterations))
+        processes.append(process)
     
-    pbar.complete_subproblem()
-    
+    for process in processes:
+        all_linkable_entities.extend(process.get())
+        
+    pool.close()
+    pool.join()
+        
     return all_linkable_entities
 
 

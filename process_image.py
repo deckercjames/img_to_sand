@@ -73,6 +73,7 @@ def process_image(input_image_path, output_visualizer_path):
     # Expand blobs to topography
     logging.info("Compiling layers...")
     layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
+    logging.debug("Got {} linkable entities".format(sum([len(layer) for layer in layers])))
     
     # Link Entities
     logging.info("Linking entities...")
