@@ -18,7 +18,7 @@ def is_goal_state(problem: LinkerProblem, search_state: LinkerSearchState) -> bo
     cur_entity_ref = search_state.cur_entity_ref
     # print("Layer check {} == ({} - 1)".format(cur_entity_ref.layer_idx, len(problem.layers)))
     # print("entity check {} == {}".format(len(search_state.visited_layer_entity_idx_set), len(problem.layers[cur_entity_ref.layer_idx])))
-    return cur_entity_ref.layer_idx == len(problem.layers) - 1 and len(search_state.visited_layer_entity_idx_set) == len(problem.layers[cur_entity_ref.layer_idx])
+    return cur_entity_ref.layer_idx == len(problem.layers) - 1 and len(search_state.visited_entity_ref_set) == sum([len(layer) for layer in problem.layers])
 
 
 

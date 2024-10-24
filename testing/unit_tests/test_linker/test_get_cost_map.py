@@ -76,7 +76,7 @@ def test_get_cost_map_basic():
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, None), # Start at border
         visited_mask=get_all_false_mask(test_problem.get_num_rows(), test_problem.get_num_cols()),
-        visited_layer_entity_idx_set=set(),
+        visited_entity_ref_set=set(),
         cost_to_state=0,
         path=[]
     )

@@ -33,13 +33,13 @@ PathItem = namedtuple("PathItem", ["entity_linkage_points", "next_entity_ref"])
 class LinkerSearchState:
     cur_entity_ref: EntityReference
     visited_mask: List[List[bool]]
-    visited_layer_entity_idx_set: Set[int]
+    visited_entity_ref_set: Set[EntityReference]
     cost_to_state: float
     path: List[PathItem]
     def __lt__(self, other):
         return True
     def __eq__(self, other):
-        return self.cur_entity_ref == other.cur_entity_ref and self.visited_layer_entity_idx_set == other.visited_layer_entity_idx_set
+        return self.cur_entity_ref == other.cur_entity_ref and self.visited_entity_ref_set == other.visited_entity_ref_set
     def __hash__(self):
         return self.cur_entity_ref.layer_idx * 971 + (self.cur_entity_ref.entity_idx if self.cur_entity_ref.entity_idx else 900)
 """

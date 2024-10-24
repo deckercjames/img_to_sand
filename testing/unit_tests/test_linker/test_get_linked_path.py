@@ -81,10 +81,14 @@ def test_get_linked_path_basic():
     for i, path_item in enumerate(recv_linked_path):
         print("\n{} of {}".format(i+1, len(recv_linked_path)))
         helper_print_path_item(layers, path_item)
+    # exit points
+    print("EXIT POINTS")
+    print(layers[0][0].get_exit_points())
+    print(layers[0][1].get_exit_points())
     # Expected Result
     exp_linked_path = [
         PathItem([(0,10), (1,10)], EntityReference(0,1)),
-        PathItem([(4, 10), (4, 9), (4, 8), (4, 7), (4, 6), (4, 5)], EntityReference(0,0)),
+        PathItem([(2, 10), (2, 9), (2, 8), (2, 7), (2, 6), (2, 5)], EntityReference(0,0)),
     ]
     # Verify
     assert len(recv_linked_path) == len(exp_linked_path)
