@@ -8,8 +8,7 @@ from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_en
 from typing import List
 from src.linker.linkable_entity.topography import get_flood_fill_grid_mask
 from src.pbar import ProgressBar
-from multiprocessing import Queue, Pool, cpu_count
-from threading import Thread
+import multiprocessing
 
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
 
@@ -71,7 +70,7 @@ def get_linkable_entities_from_blob(blob, num_line_errosion_itterations: int, nu
 def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itterations: int, num_blob_buffer_itterations: int, pbar: ProgressBar):
     
     all_linkable_entities = []
-    pool = Pool(processes=(cpu_count() - 1))
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() - 1))
     processes = []
     
     for blob in blob_layer:

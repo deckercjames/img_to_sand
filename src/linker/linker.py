@@ -6,6 +6,7 @@ from src.utils import get_grid_mask_union
 from src.linker.linkable_entity.linkable_entity import EntityReference
 from src.linker.get_children import get_child_states
 from src.linker.linker_problem import *
+import multiprocessing
 
 from src.pbar import ProgressBar
 from src.visualizer.visual_debugger import dump_linker_open_list
@@ -26,7 +27,22 @@ def get_heuristic_for_state(problem: LinkerProblem, search_state: LinkerSearchSt
     return 0
 
 
-def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: int, beam_width: int):
+def expand_linker_search_state(problem: LinkerProblem, current_state: LinkerSearchState, max_children_per_expansion: int):
+    if is_goal_state(problem, current_state):
+        return current_state.path, None
+    
+    child_fringe = []
+
+    # Expand children
+    for child_state in get_child_states(problem, current_state, max_children_per_expansion):
+        new_f = child_state.cost_to_state + get_heuristic_for_state(problem, child_state)
+        child_fringe.append((new_f, child_state))
+    
+    return None, child_fringe
+                
+
+
+def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: int, beam_width: int):
     
     start_state = LinkerSearchState(
         EntityReference(0, None),
@@ -43,46 +59,47 @@ def get_single_linked_path(problem: LinkerProblem, max_children_pre_expansion: i
     itter_cnt = 0
     dump_linker_open_list(problem, fringe, itter_cnt)
     
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() - 1))
     while True:
         next_fringe = []
         
         itter_cnt += 1
-        # print(itter_cnt, problem.get_total_num_entities_to_link())
+        print("ITTERATION", itter_cnt, problem.get_total_num_entities_to_link())
+
+        # Expand each item in the fringe
         
-        pbar.push_subproblem(len(fringe))
+        processes = []
         
-        while len(fringe) > 0:
-            
-            # Pop next state
-            _, current_state = heapq.heappop(fringe)
-            
-            # print("\n\nCurrentState {")
-            # print("  current_entity_ref: {}".format(str(current_state.cur_entity_ref)))
-            # print("  visited_layer_entity_idx_set: {}".format(str(current_state.visited_layer_entity_idx_set)))
-            # print("  ...\n}")
-            
-            # Check goal state
-            if is_goal_state(problem, current_state):
-                pbar.complete()
-                return current_state.path
-            
-            # Expand children
-            for child_state in get_child_states(problem, current_state, max_children_pre_expansion):
-                new_f = child_state.cost_to_state + get_heuristic_for_state(problem, child_state)
-                heapq.heappush(next_fringe, (new_f, child_state))
+        for _, state in fringe:
+            process = pool.apply_async(func=expand_linker_search_state, args=(problem, state, max_children_per_expansion))
+            processes.append(process)
+        
+        for process in processes:
+            goal, children = process.get()
+            if goal is not None:
+                return goal
+            for child in children:
+                heapq.heappush(next_fringe, child)
+        
+        print("next fring length" + str(len(next_fringe)))
                 
-            pbar.update()
-        
-        pbar.complete_subproblem()
-            
         # Enforce beam limit
         visited_this_search_level = set()
+        fringe = []
         while len(next_fringe) > 0 and len(fringe) < beam_width:
             fringe_item = heapq.heappop(next_fringe)
             if fringe_item in visited_this_search_level:
                 continue
             heapq.heappush(fringe, fringe_item)
             visited_this_search_level.add(fringe_item)
+            
+        print("fring length" + str(len(fringe)))
+            
+        print("FRINGE DUMP")
+        # print(fringe[0])
+        # print(fringe[0].path)
+        # print(fringe[1])
+        # print(fringe[1].path)
 
         dump_linker_open_list(problem, fringe, itter_cnt)
 

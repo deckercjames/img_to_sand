@@ -132,6 +132,7 @@ def generate_child_state(problem: GetChildrenProblem, current_state: GetChildren
         cost_to_state=current_state.cost+child_cost,
         path=problem.linker_path.copy() + [PathItem(child_linkage_points, child_entity_ref)]
     )
+    print("BUILT child. path "+str(child.path))
     return child
 
 
