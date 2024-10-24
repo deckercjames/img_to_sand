@@ -132,7 +132,6 @@ def generate_child_state(problem: GetChildrenProblem, current_state: GetChildren
         cost_to_state=current_state.cost+child_cost,
         path=problem.linker_path.copy() + [PathItem(child_linkage_points, child_entity_ref)]
     )
-    print("BUILT child. path "+str(child.path))
     return child
 
 
@@ -158,7 +157,6 @@ def search_for_close_entity_links(problem: GetChildrenProblem, num_children: int
     fringe = []
     
     can_find_border = problem.start_entity_ref.entity_idx is not None
-    print("CAN FIND BORDER "+str(can_find_border))
     
     # Add all exit points from the current entity
     for start_point in start_points:
@@ -186,29 +184,24 @@ def search_for_close_entity_links(problem: GetChildrenProblem, num_children: int
         child_state_added = False
         # if border_is_goal:
         if can_find_border and check_reached_border(problem, cur_state):
-            print("FOUND BORDER")
             child_states.append(generate_child_state(problem, cur_state, EntityReference(problem.search_layer_idx, None), cur_state.path, cur_state.cost))
             child_state_added = True
             can_find_border = False
         # else:
         reached_entity_ref = check_reached_new_entity(problem, cur_state)
         if reached_entity_ref is not None:
-            print("FOUND ENTITY")
             child_states.append(generate_child_state(problem, cur_state, reached_entity_ref, cur_state.path, cur_state.cost))
             problem.search_entity_refs.remove(reached_entity_ref)
             child_state_added = True
 
         if len(child_states) == num_children:
-            print("FOUND ALL CHIDREN")
             return child_states
         
         if len(problem.search_entity_refs) == 0 and not can_find_border:
-            print("NO MORE CHIDREN")
             return child_states
 
         # Reorder fringe based on changed heuristic
         if child_state_added:
-            print("-- reordering fringe")
             new_fringe = []
             while len(fringe) > 0:
                 _, node = heapq.heappop(fringe)

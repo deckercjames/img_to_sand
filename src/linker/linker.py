@@ -64,7 +64,6 @@ def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: i
         next_fringe = []
         
         itter_cnt += 1
-        print("ITTERATION", itter_cnt, problem.get_total_num_entities_to_link())
 
         # Expand each item in the fringe
         
@@ -81,8 +80,6 @@ def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: i
             for child in children:
                 heapq.heappush(next_fringe, child)
         
-        print("next fring length" + str(len(next_fringe)))
-                
         # Enforce beam limit
         visited_this_search_level = set()
         fringe = []
@@ -93,14 +90,6 @@ def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: i
             heapq.heappush(fringe, fringe_item)
             visited_this_search_level.add(fringe_item)
             
-        print("fring length" + str(len(fringe)))
-            
-        print("FRINGE DUMP")
-        # print(fringe[0])
-        # print(fringe[0].path)
-        # print(fringe[1])
-        # print(fringe[1].path)
-
         dump_linker_open_list(problem, fringe, itter_cnt)
 
         pbar.update()
