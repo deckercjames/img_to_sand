@@ -25,6 +25,7 @@ class GetChildrenProblem:
     child_visited_entity_ref_set: Set[EntityReference]
     visited_mask: List[List[bool]]
     linker_path: List[PathItem]
+    cost_to_linker_state: float
     cost_map: List[List[int]]
     def get_num_rows(self):
         return len(self.cost_map) - 1
@@ -129,7 +130,7 @@ def generate_child_state(problem: GetChildrenProblem, current_state: GetChildren
         cur_entity_ref=child_entity_ref,
         visited_mask=child_visited_mask,
         visited_entity_ref_set=child_visited_entity_ref_set,
-        cost_to_state=current_state.cost+child_cost,
+        cost_to_state=problem.cost_to_linker_state+child_cost,
         path=problem.linker_path.copy() + [PathItem(child_linkage_points, child_entity_ref)]
     )
     return child
@@ -320,6 +321,7 @@ def get_child_states(problem: LinkerProblem, current_state: LinkerSearchState, n
         child_visited_entity_ref_set=current_state.visited_entity_ref_set,
         visited_mask=current_state.visited_mask,
         linker_path=current_state.path,
+        cost_to_linker_state=current_state.cost_to_state,
         cost_map=_get_cost_map(problem, current_state),
     )
     

@@ -29,7 +29,7 @@ def get_heuristic_for_state(problem: LinkerProblem, search_state: LinkerSearchSt
 
 def expand_linker_search_state(problem: LinkerProblem, current_state: LinkerSearchState, max_children_per_expansion: int):
     if is_goal_state(problem, current_state):
-        return current_state.path, None
+        return current_state, None
     
     child_fringe = []
 
@@ -73,12 +73,23 @@ def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: i
             process = pool.apply_async(func=expand_linker_search_state, args=(problem, state, max_children_per_expansion))
             processes.append(process)
         
+        found_goals = []
+        
         for process in processes:
             goal, children = process.get()
             if goal is not None:
-                return goal
+                found_goals.append(goal)
+                continue
             for child in children:
                 heapq.heappush(next_fringe, child)
+        
+        # If any goals were found, return the best one
+        if len(found_goals) > 0:
+            best_goal = found_goals[0]
+            for goal in found_goals:
+                if goal.cost_to_state < best_goal.cost_to_state:
+                    best_goal = goal
+            return best_goal.path
         
         # Enforce beam limit
         visited_this_search_level = set()
