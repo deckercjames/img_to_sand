@@ -1,7 +1,7 @@
 
 from copy import deepcopy
 from typing import List
-
+import numpy as np
 
 def get_list_element_cyclic(list, i):
     return list[i % len(list)]
@@ -41,6 +41,18 @@ def get_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
         raise Exception("Can not subtract different sized masks. ({}x{}) - ({}x{})".format(len(grid_mask), len(grid_mask[0]), len(grid_mask_subtrahend), len(grid_mask_subtrahend[0])))
 
     return [[(grid_mask[r][c] and not grid_mask_subtrahend[r][c]) for c in range(len(grid_mask[r]))] for r in range(len(grid_mask))]
+
+
+def get_numpy_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
+    if grid_mask.shape != grid_mask_subtrahend.shape:
+        raise Exception("Can not subtract different sized masks. ({}) - ({})".format(grid_mask.shape, grid_mask_subtrahend.shape))
+    
+    result = np.empty(shape=grid_mask.shape, dtype='bool')
+    
+    for r, c in np.ndindex(grid_mask.shape):
+        result[r,c] = grid_mask[r,c] and not grid_mask_subtrahend[r,c]
+
+    return result
 
 
 def get_all_false_mask(num_rows, num_cols):

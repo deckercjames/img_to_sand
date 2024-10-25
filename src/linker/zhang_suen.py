@@ -5,6 +5,8 @@ from src.utils import get_grid_mask_subtraction
 from src.utils import get_mask_with_inward_bleed
 from src.utils import grid_mask_to_str
 
+import numpy as np
+
 #==================================================
 # Main Zhang Suen Algorithm
 #==================================================
@@ -65,7 +67,7 @@ def zhang_suen_errosion(grid_mask):
 
 def get_area_blobs(erroded_grid_mask):
 
-    remaining_blobs = [[False for _ in range(len(row))] for row in erroded_grid_mask]
+    remaining_blobs = np.full(erroded_grid_mask.shape, False, dtype='bool')
 
     for r in range(len(erroded_grid_mask) - 1):
         for c in range(len(erroded_grid_mask[r]) - 1):
