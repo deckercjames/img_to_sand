@@ -30,17 +30,16 @@ def _get_transition_count(neighbours):
 
 def _zhang_suen_errosion_single_step(image, neighbor_indicies_set_1, neighbor_indicies_set_2):
     changing = []
-    for r in range(len(image)):
-        for c in range(len(image[r])):
-            neighbours = _get_neighbours(image, r, c)
-            if (image[r][c] and
-                    (any([not neighbours[i-2] for i in neighbor_indicies_set_1])) and   # Neighbors are indexed starting with P2
-                    (any([not neighbours[i-2] for i in neighbor_indicies_set_2])) and
-                    _get_transition_count(neighbours) == 1 and
-                    2 <= sum([1 if n else 0 for n in neighbours]) <= 6):
-                changing.append((r,c))
+    for r, c in np.ndindex(image.shape):
+        neighbours = _get_neighbours(image, r, c)
+        if (image[r, c] and
+                (any([not neighbours[i-2] for i in neighbor_indicies_set_1])) and   # Neighbors are indexed starting with P2
+                (any([not neighbours[i-2] for i in neighbor_indicies_set_2])) and
+                _get_transition_count(neighbours) == 1 and
+                2 <= sum([1 if n else 0 for n in neighbours]) <= 6):
+            changing.append((r,c))
     for r, c in changing:
-        image[r][c] = False
+        image[r, c] = False
     return len(changing)
 
 
