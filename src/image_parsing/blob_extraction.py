@@ -174,23 +174,22 @@ def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
     
     blob_tree_nodes = []
 
-    for r in range(pixel_grid.shape[0]):
-        for c in range(pixel_grid.shape[1]):
-            if not grid_mask[r][c]:
-                continue
-            if pixel_grid[r, c] == 0:
-                continue
-            blob_mask = get_flood_fill_blob_mask(pixel_grid, r, c)
-            blob_outer_contour = get_blob_mask_outer_contour(blob_mask, r, c)
-            total_blob_mask = get_total_blob_mask(blob_outer_contour, len(pixel_grid), len(pixel_grid[0]))
-            # subtract the total blob mas from the current mask
-            # we do not want to count this blob again and sub blobs will be found with the recursive call
-            grid_mask = get_grid_mask_subtraction(grid_mask, total_blob_mask)
-            sub_blob_mask = get_grid_mask_subtraction(total_blob_mask, blob_mask)
-            sub_blob_tree_nodes = get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=sub_blob_mask)
-            blob = Blob(blob_outer_contour, blob_mask, total_blob_mask)
-            blob_tree_node = TreeNode(blob, sub_blob_tree_nodes)
-            blob_tree_nodes.append(blob_tree_node)
+    for r, c in np.ndindex(pixel_grid.shape):
+        if not grid_mask[r][c]:
+            continue
+        if pixel_grid[r, c] == 0:
+            continue
+        blob_mask = get_flood_fill_blob_mask(pixel_grid, r, c)
+        blob_outer_contour = get_blob_mask_outer_contour(blob_mask, r, c)
+        total_blob_mask = get_total_blob_mask(blob_outer_contour, len(pixel_grid), len(pixel_grid[0]))
+        # subtract the total blob mas from the current mask
+        # we do not want to count this blob again and sub blobs will be found with the recursive call
+        grid_mask = get_grid_mask_subtraction(grid_mask, total_blob_mask)
+        sub_blob_mask = get_grid_mask_subtraction(total_blob_mask, blob_mask)
+        sub_blob_tree_nodes = get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=sub_blob_mask)
+        blob = Blob(blob_outer_contour, blob_mask, total_blob_mask)
+        blob_tree_node = TreeNode(blob, sub_blob_tree_nodes)
+        blob_tree_nodes.append(blob_tree_node)
     
     return blob_tree_nodes
 
