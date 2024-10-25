@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from src.utils import check_grid_element_safe
 from src.utils import check_numpy_grid_element_safe
-from src.utils import get_grid_mask_subtraction
+from src.utils import get_numpy_grid_mask_subtraction
 from src.utils import get_list_element_cyclic
 
 from src.tree import TreeNode
@@ -175,7 +175,7 @@ def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
     blob_tree_nodes = []
 
     for r, c in np.ndindex(pixel_grid.shape):
-        if not grid_mask[r][c]:
+        if not grid_mask[r, c]:
             continue
         if pixel_grid[r, c] == 0:
             continue
@@ -184,8 +184,8 @@ def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
         total_blob_mask = get_total_blob_mask(blob_outer_contour, len(pixel_grid), len(pixel_grid[0]))
         # subtract the total blob mas from the current mask
         # we do not want to count this blob again and sub blobs will be found with the recursive call
-        grid_mask = get_grid_mask_subtraction(grid_mask, total_blob_mask)
-        sub_blob_mask = get_grid_mask_subtraction(total_blob_mask, blob_mask)
+        grid_mask = get_numpy_grid_mask_subtraction(grid_mask, total_blob_mask)
+        sub_blob_mask = get_numpy_grid_mask_subtraction(total_blob_mask, blob_mask)
         sub_blob_tree_nodes = get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=sub_blob_mask)
         blob = Blob(blob_outer_contour, blob_mask, total_blob_mask)
         blob_tree_node = TreeNode(blob, sub_blob_tree_nodes)
