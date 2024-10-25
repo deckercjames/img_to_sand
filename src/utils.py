@@ -28,6 +28,14 @@ def check_grid_element_safe(grid, r, c, default=None):
     return grid[r][c]
 
 
+def check_numpy_grid_element_safe(numpy_grid, r, c, default=None):
+    if r < 0 or r >= numpy_grid.shape[0]:
+        return default
+    if c < 0 or c >= numpy_grid.shape[1]:
+        return default
+    return numpy_grid[r, c]
+
+
 def get_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
     if len(grid_mask) != len(grid_mask_subtrahend) or len(grid_mask[0]) != len(grid_mask_subtrahend[0]):
         raise Exception("Can not subtract different sized masks. ({}x{}) - ({}x{})".format(len(grid_mask), len(grid_mask[0]), len(grid_mask_subtrahend), len(grid_mask_subtrahend[0])))

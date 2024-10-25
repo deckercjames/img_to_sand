@@ -3,13 +3,18 @@ from enum import Enum
 from collections import namedtuple
 
 from src.utils import check_grid_element_safe
+from src.utils import check_numpy_grid_element_safe
 from src.utils import get_grid_mask_subtraction
 from src.utils import get_list_element_cyclic
 
 from src.tree import TreeNode
+import numpy as np
+import numpy.typing as npt
 
 
-Blob = namedtuple("Blob", ["outer_contour", "mask", "total_mask"])
+class Blob(namedtuple("Blob", ["outer_contour", "mask", "total_mask"])):
+    def __eq__(self, other):
+        return self.outer_contour == other.outer_contour and (self.mask==other.mask).all() and (self.total_mask==other.total_mask).all()
 
 class MoveDir(Enum):
     NORTH = 0,
@@ -64,18 +69,18 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
     pixel_stack = []
     pixel_stack.append((r, c))
     
-    blob_color_index = pixel_grid[r][c]
+    blob_color_index = pixel_grid[r, c]
     if blob_color_index == 0:
         return pixel_grid
     
-    blob_mask = [[False for _ in range(len(row))] for row in pixel_grid]
+    blob_mask = np.full(pixel_grid.shape, False, dtype='bool')
     
     while len(pixel_stack) > 0:
         r, c = pixel_stack.pop()
-        if r < 0 or r >= len(pixel_grid) or c < 0 or c >= len(pixel_grid[0]):
+        if r < 0 or r >= pixel_grid.shape[0] or c < 0 or c >= pixel_grid.shape[1]:
             continue
         # already visited
-        if blob_mask[r][c]:
+        if blob_mask[r, c]:
             continue
         # check if pixel should be included
         if check_grid_element_safe(pixel_grid, r, c) != blob_color_index:
@@ -85,7 +90,7 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
         pixel_stack.append((r - 1, c))
         pixel_stack.append((r, c - 1))
         pixel_stack.append((r, c + 1))
-        blob_mask[r][c] = True
+        blob_mask[r ,c] = True
     
     return blob_mask
 
@@ -93,23 +98,23 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
 def get_total_blob_mask(contour, num_rows, num_cols):
     
     # break the contour list into a grid of horizontal and vertical boundaries ("fences")
-    hor_fences  = [[False for _ in range(num_cols)] for _ in range(num_rows + 1)]
-    vert_fences = [[False for _ in range(num_cols + 1)] for _ in range(num_rows)]
+    hor_fences  = np.full((num_rows+1, num_cols), False, dtype='bool')
+    vert_fences = np.full((num_rows, num_cols+1), False, dtype='bool')
     
     # populate fence tables
     for i, point in enumerate(contour):
         r, c = point
         prev_r, prev_c = get_list_element_cyclic(contour, i - 1)
         if r == prev_r:
-            hor_fences[r][min(c, prev_c)] = True
+            hor_fences[r, min(c, prev_c)] = True
         elif c == prev_c:
-            vert_fences[min(r, prev_r)][c] = True
+            vert_fences[min(r, prev_r), c] = True
         else:
             raise Exception("Somethiing has gone horribally wrong")
 
     # Flood fill total blob using fences as restrictions
     
-    total_blob_mask = [[False for _ in range(num_cols)] for _ in range(num_rows)]
+    total_blob_mask = np.full((num_rows, num_cols), False, dtype='bool')
     
     pixel_stack = []
     pixel_stack.append(contour[0])
@@ -119,14 +124,14 @@ def get_total_blob_mask(contour, num_rows, num_cols):
         # already visited
         if r < 0 or r >= num_rows or c < 0 or c >= num_cols:
             continue
-        if total_blob_mask[r][c]:
+        if total_blob_mask[r, c]:
             continue
         # expand pixel
-        if not hor_fences[r+1][c]:  pixel_stack.append((r + 1, c))
-        if not hor_fences[r][c]:    pixel_stack.append((r - 1, c))
-        if not vert_fences[r][c]:   pixel_stack.append((r, c - 1))
-        if not vert_fences[r][c+1]: pixel_stack.append((r, c + 1))
-        total_blob_mask[r][c] = True
+        if not hor_fences[r+1, c]:  pixel_stack.append((r + 1, c))
+        if not hor_fences[r, c]:    pixel_stack.append((r - 1, c))
+        if not vert_fences[r, c]:   pixel_stack.append((r, c - 1))
+        if not vert_fences[r, c+1]: pixel_stack.append((r, c + 1))
+        total_blob_mask[r, c] = True
     
     return total_blob_mask
 
@@ -145,7 +150,7 @@ def get_blob_mask_outer_contour(blob_mask, r, c):
             if move_option[1] is None:
                 break
             check_location = (current_pos[0] + move_option[1][0], current_pos[1] + move_option[1][1])
-            if check_blob_mask_pixel(blob_mask, check_location[0], check_location[1]):
+            if check_numpy_grid_element_safe(blob_mask, check_location[0], check_location[1], default=False):
                 continue
             break
         contour.append(current_pos)
@@ -165,15 +170,15 @@ def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
     """
     # No grid mask means the whole pixel grid is usable
     if grid_mask is None:
-        grid_mask = [[True for _ in range(len(row))] for row in pixel_grid]
+        grid_mask = np.full(pixel_grid.shape, True, dtype='bool')
     
     blob_tree_nodes = []
 
-    for r, row in enumerate(pixel_grid):
-        for c, pixel in enumerate(row):
+    for r in range(pixel_grid.shape[0]):
+        for c in range(pixel_grid.shape[1]):
             if not grid_mask[r][c]:
                 continue
-            if pixel == 0:
+            if pixel_grid[r, c] == 0:
                 continue
             blob_mask = get_flood_fill_blob_mask(pixel_grid, r, c)
             blob_outer_contour = get_blob_mask_outer_contour(blob_mask, r, c)
