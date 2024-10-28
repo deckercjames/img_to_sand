@@ -56,11 +56,17 @@ def process_image(input_image_path, output_visualizer_path):
     # Cluster like colors
     logging.info("Enumerating pixels...")
     pixel_grid = enumerate_pixels(raw_pixels)
-    
+
     # Extract blobs
     logging.info("Extracting blobs...")
     blob_trees = get_blob_tree_nodes_from_pixel_grid(pixel_grid)
-    logging.debug("Found {} blobs".format(sum([tree.count_nodes() for tree in blob_trees])))
+    num_blobs = sum([tree.count_nodes() for tree in blob_trees])
+    
+    if num_blobs == 0:
+        logging.fatal("Found 0 blobs in given image")
+        return 1
+    
+    logging.debug("Found {} blobs".format(num_blobs))
     
     # Consolidate blob trees
     logging.info("Consolidating blob trees...")
