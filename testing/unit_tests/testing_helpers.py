@@ -5,21 +5,6 @@ COLOR_RED = '\033[31m'
 COLOR_GREEN = '\033[32m'
 COLOR_NONE = '\033[00m'
 
-def helper_mask_string_to_bool_mask(str_rep):
-    result = []
-    for row in str_rep:
-        result_row = []
-        for cell in row:
-            if cell == "#":
-                result_row.append(True)
-            elif cell == ' ':
-                result_row.append(False)
-            else:
-                raise Exception("Bool mask must be made of '#' or <space> characters")
-        result.append(result_row)
-    return result
-
-
 def helper_mask_string_to_numpy_bool_mask(str_rep):
     # assert even grid
     assert all([len(row) == len(str_rep[0]) for row in str_rep])
@@ -56,7 +41,7 @@ def helper_numpy_grid_mask_to_string(grid_mask):
 def helper_pretty_mask_compare(expected, result):
     # normalize types to List[List[bool]]
     if type(expected[0][0]) != bool:
-        expected = helper_mask_string_to_bool_mask(expected)
+        expected = helper_mask_string_to_numpy_bool_mask(expected)
     # Compare
     if len(expected) != len(result):
         print("Grids have different number of rows. Expected {}, Received {}".format(len(expected), len(result)))

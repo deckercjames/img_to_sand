@@ -2,12 +2,13 @@
 from src.image_parsing.blob_extraction import get_blob_mask_outer_contour
 from src.image_parsing.blob_extraction import get_total_blob_mask
 from src.image_parsing.blob_extraction import Blob
-from src.utils import get_grid_mask_subtraction
-from src.utils import get_grid_mask_union
+from src.utils import get_numpy_grid_mask_subtraction
+from src.utils import get_numpy_grid_mask_union
 from src.utils import check_mask_intersection
 from src.utils import get_list_element_cyclic
-from src.utils import get_mask_with_inward_bleed
+from src.utils import get_numpy_mask_with_inward_bleed
 from src.tree import TreeNode
+import numpy as np
 
 
 def _apply_topography_tree_node_to_visual_rep(node, hor_fences, vert_fences):
@@ -64,17 +65,17 @@ def get_flood_fill_grid_mask(grid_mask, start_r, start_c, diag=False):
     cell_stack = []
     cell_stack.append((start_r, start_c))
 
-    grid_blob_mask = [[False for _ in range(len(row))] for row in grid_mask]
+    grid_blob_mask = np.full(grid_mask.shape, False, dtype='bool')
     
     while len(cell_stack) > 0:
         r, c = cell_stack.pop()
-        if r < 0 or r >= len(grid_mask) or c < 0 or c >= len(grid_mask[0]):
+        if r < 0 or r >= grid_mask.shape[0] or c < 0 or c >= grid_mask.shape[1]:
             continue
         # already visited
-        if grid_blob_mask[r][c]:
+        if grid_blob_mask[r, c]:
             continue
         # check if pixel should be included
-        if not grid_mask[r][c]:
+        if not grid_mask[r, c]:
             continue
         # expand pixel
         cell_stack.append((r + 1, c))
@@ -86,7 +87,7 @@ def get_flood_fill_grid_mask(grid_mask, start_r, start_c, diag=False):
             cell_stack.append((r + 1, c + 1))
             cell_stack.append((r - 1, c - 1))
             cell_stack.append((r - 1, c + 1))
-        grid_blob_mask[r][c] = True
+        grid_blob_mask[r, c] = True
     
     return grid_blob_mask
 
@@ -102,16 +103,15 @@ def get_all_blobs_from_mask(grid_mask):
     num_rows = len(grid_mask)
     num_cols = len(grid_mask[0])
     
-    for r in range(num_rows):
-        for c in range(num_cols):
-            if not grid_mask[r][c]:
-                continue
-            grid_blob_mask = get_flood_fill_grid_mask(grid_mask, r, c)
-            grid_blob_contour = get_blob_mask_outer_contour(grid_blob_mask, r, c)
-            grid_blob_total_mask = get_total_blob_mask(grid_blob_contour, num_rows, num_cols)
-            blob = Blob(grid_blob_contour, grid_blob_mask, grid_blob_total_mask)
-            grid_mask = get_grid_mask_subtraction(grid_mask, grid_blob_mask)
-            blobs.append(blob)
+    for r, c in np.ndindex(grid_mask.shape):
+        if not grid_mask[r, c]:
+            continue
+        grid_blob_mask = get_flood_fill_grid_mask(grid_mask, r, c)
+        grid_blob_contour = get_blob_mask_outer_contour(grid_blob_mask, r, c)
+        grid_blob_total_mask = get_total_blob_mask(grid_blob_contour, num_rows, num_cols)
+        blob = Blob(grid_blob_contour, grid_blob_mask, grid_blob_total_mask)
+        grid_mask = get_numpy_grid_mask_subtraction(grid_mask, grid_blob_mask)
+        blobs.append(blob)
     
     return blobs
 
@@ -130,7 +130,7 @@ def get_blob_topography(blob: Blob) -> TreeNode:
         root_node
     ]
     
-    root_voids_mask = get_grid_mask_subtraction(blob.total_mask, blob.mask)
+    root_voids_mask = get_numpy_grid_mask_subtraction(blob.total_mask, blob.mask)
     negative_branches = [TreeNode(b, []) for b in get_all_blobs_from_mask(root_voids_mask)]
     
     
@@ -139,7 +139,7 @@ def get_blob_topography(blob: Blob) -> TreeNode:
     while True:
         # print("Num pos branches "+str(len(positive_branchs)))
         # print("Num neg branches "+str(len(negative_branches)))
-        main_mask = get_mask_with_inward_bleed(main_mask, diag_bleed=True)
+        main_mask = get_numpy_mask_with_inward_bleed(main_mask, diag_bleed=True)
         # print("Current main mask")
         # print(grid_mask_to_str(main_mask))
         
@@ -148,11 +148,11 @@ def get_blob_topography(blob: Blob) -> TreeNode:
         positive_nodes = [TreeNode(b, []) for b in positive_blobs]
         
         # invert mask
-        void_mask = [[False for _ in range(len(row))] for row in main_mask]
+        void_mask = np.full(main_mask.shape, False, dtype='bool')
         for positive_blob in positive_blobs:
-            void_mask = get_grid_mask_union(void_mask, positive_blob.total_mask)
+            void_mask = get_numpy_grid_mask_union(void_mask, positive_blob.total_mask)
         for positive_blob in positive_blobs:
-            void_mask = get_grid_mask_subtraction(void_mask, positive_blob.mask)
+            void_mask = get_numpy_grid_mask_subtraction(void_mask, positive_blob.mask)
         # print("Current main void mask")
         # print(grid_mask_to_str(void_mask))
         

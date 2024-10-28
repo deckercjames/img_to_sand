@@ -1,7 +1,7 @@
 
 from src.utils import check_numpy_grid_element_safe
-from src.utils import get_grid_mask_subtraction
-from src.utils import get_mask_with_inward_bleed
+from src.utils import get_numpy_grid_mask_subtraction
+from src.utils import get_numpy_mask_with_inward_bleed
 from src.utils import grid_mask_to_str
 
 import numpy as np
@@ -111,7 +111,7 @@ def get_split_lines_and_blobs(blob_grid_mask, itterations):
     micro_blob_grid_mask = get_area_blobs(erroded_grid_mask)
     
     blob_only_grid_mask = get_flood_fill_area_blobs(blob_grid_mask, micro_blob_grid_mask, itterations + 3)
-    line_only_grid_mask = get_grid_mask_subtraction(erroded_grid_mask, blob_only_grid_mask)
+    line_only_grid_mask = get_numpy_grid_mask_subtraction(erroded_grid_mask, blob_only_grid_mask)
     
     return (blob_only_grid_mask, line_only_grid_mask)
     

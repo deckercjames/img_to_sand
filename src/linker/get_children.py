@@ -3,13 +3,15 @@ from src.linker.linkable_entity.linkable_entity import LinkableEntity
 from typing import List, Set
 from src.utils import get_neighbor_points
 from src.utils import check_grid_element_safe
+from src.utils import check_numpy_grid_element_safe
 from src.utils import get_grid_mask_union
 import heapq
 from copy import deepcopy
 from src.linker.linkable_entity.linkable_entity import EntityReference
 import sys
 from src.linker.linker_problem import *
-import time
+import numpy as np
+import numpy.typing as npt
 
 from dataclasses import dataclass
 
@@ -23,14 +25,14 @@ class GetChildrenProblem:
     search_layer_idx: int
     search_entity_refs: Set[EntityReference]
     child_visited_entity_ref_set: Set[EntityReference]
-    visited_mask: List[List[bool]]
+    visited_mask: npt.NDArray
     linker_path: List[PathItem]
     cost_to_linker_state: float
-    cost_map: List[List[int]]
+    cost_map: npt.NDArray
     def get_num_rows(self):
-        return len(self.cost_map) - 1
+        return self.cost_map.shape[0] - 1
     def get_num_cols(self):
-        return len(self.cost_map[0]) - 1
+        return self.cost_map.shape[1] - 1
     
 
 @dataclass
@@ -123,9 +125,9 @@ def generate_child_state(problem: GetChildrenProblem, current_state: GetChildren
     child_visited_entity_ref_set = problem.child_visited_entity_ref_set.copy()
     if child_entity_ref.entity_idx is not None:
         child_visited_entity_ref_set.add(child_entity_ref)
-        child_visited_mask = get_grid_mask_union(problem.visited_mask, problem.layers[child_entity_ref.layer_idx][child_entity_ref.entity_idx].get_entity_grid_mask())
+        child_visited_mask = np.logical_or(problem.visited_mask, problem.layers[child_entity_ref.layer_idx][child_entity_ref.entity_idx].get_entity_grid_mask())
     else:
-        child_visited_mask = deepcopy(problem.visited_mask)
+        child_visited_mask = problem.visited_mask.copy()
     child = LinkerSearchState(
         cur_entity_ref=child_entity_ref,
         visited_mask=child_visited_mask,
@@ -217,7 +219,7 @@ def search_for_close_entity_links(problem: GetChildrenProblem, num_children: int
         r, c = cur_state.position
         for nr, nc in get_neighbor_points(r, c):
             # Check on board
-            if nr < 0 or nr >= len(problem.cost_map) or nc < 0 or nc >= len(problem.cost_map[0]):
+            if nr < 0 or nr >= problem.cost_map.shape[0] or nc < 0 or nc >= problem.cost_map.shape[1]:
                 continue
             # Check visited
             if (nr, nc) in visited:
@@ -225,7 +227,7 @@ def search_for_close_entity_links(problem: GetChildrenProblem, num_children: int
             # Add to fringe
             new_path = cur_state.path.copy()
             new_path.append((nr, nc))
-            step_cost = check_grid_element_safe(problem.cost_map, r, c, default=0)
+            step_cost = check_numpy_grid_element_safe(problem.cost_map, r, c, default=0)
             if nr != r and nc != c:
                 step_cost *= ROOT_TWO
             new_cost = cur_state.cost + step_cost
@@ -275,7 +277,7 @@ def _get_search_entity_refs(problem: LinkerProblem, current_state: LinkerSearchS
 
 def _get_cost_map(problem: LinkerProblem, current_state: LinkerSearchState):
     
-    cost_map = [[0 for _ in range(problem.get_num_cols()+1)] for _ in range(problem.get_num_rows()+1)]
+    cost_map = np.empty(shape=(problem.get_num_rows()+1, problem.get_num_cols()+1))
     
     # print(problem.num_rows, problem.num_cols)
     # print(len(problem.total_image_mask), len(problem.total_image_mask[0]))
@@ -283,12 +285,12 @@ def _get_cost_map(problem: LinkerProblem, current_state: LinkerSearchState):
     for r in range(len(cost_map)):
         for c in range(len(cost_map[r])):
             # print(r, c)
-            if check_grid_element_safe(current_state.visited_mask, r, c, default=False):
-                cost_map[r][c] = problem.cost_menu.visited_mask_cost
-            elif check_grid_element_safe(problem.total_image_mask, r, c, default=False):
-                cost_map[r][c] = problem.cost_menu.future_mask_cost
+            if check_numpy_grid_element_safe(current_state.visited_mask, r, c, default=False):
+                cost_map[r, c] = problem.cost_menu.visited_mask_cost
+            elif check_numpy_grid_element_safe(problem.total_image_mask, r, c, default=False):
+                cost_map[r, c] = problem.cost_menu.future_mask_cost
             else:
-                cost_map[r][c] = problem.cost_menu.base_cost
+                cost_map[r, c] = problem.cost_menu.base_cost
     
     # Bleed higher costs inward to encourage paths to stay away from the edges
     # for _ in range(5):

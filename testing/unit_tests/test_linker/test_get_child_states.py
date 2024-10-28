@@ -12,6 +12,7 @@ from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from copy import deepcopy
 from src.linker.layer_stratagem import get_all_layer_stratagem
+import numpy as np
 
 def helper_pixel_grid_str_parser(pixel_grid_str):
     pixel_grid = []
@@ -19,7 +20,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
         pixel_grid.append(
             [0 if c == ' ' else int(c) for c in line]
         )
-    return pixel_grid
+    return np.array(pixel_grid, dtype='bool')
 
 
 def helper_get_layers(pixel_grid_str, num_line_errosions=0):
@@ -38,7 +39,7 @@ def helper_get_layers(pixel_grid_str, num_line_errosions=0):
     
     layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=num_line_errosions, num_blob_buffer_itterations=0)
     
-    total_image_mask = [[c != ' ' for c in line] for line in pixel_grid_str]
+    total_image_mask = np.array([[c != ' ' for c in line] for line in pixel_grid_str], dtype='bool')
 
     return layers, total_image_mask
     
@@ -101,7 +102,7 @@ def test_get_one_child_states_from_beginning():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, None), # Start at border
-        visited_mask=get_all_false_mask(test_problem.get_num_rows(), test_problem.get_num_cols()),
+        visited_mask=np.full(test_problem.total_image_mask.shape, False, dtype='bool'),
         visited_entity_ref_set=set(),
         cost_to_state=0,
         path=[]
@@ -118,7 +119,7 @@ def test_get_one_child_states_from_beginning():
     exp_child_states = [
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 0),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, True,  True,  False, False, False, False, False],
@@ -128,7 +129,7 @@ def test_get_one_child_states_from_beginning():
                 [False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 0)},
             cost_to_state=2,
             path=[PathItem([(0, 6), (1, 6), (2, 6)], EntityReference(0,0))]
@@ -161,7 +162,7 @@ def test_get_child_states_from_beginning():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, None), # Start at border
-        visited_mask=get_all_false_mask(test_problem.get_num_rows(), test_problem.get_num_cols()),
+        visited_mask=np.full(test_problem.total_image_mask.shape, False, dtype='bool'),
         visited_entity_ref_set=set(),
         cost_to_state=0,
         path=[]
@@ -178,26 +179,26 @@ def test_get_child_states_from_beginning():
     exp_child_states = [
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 1),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 1)},
             cost_to_state=1,
             path=[PathItem([(5,14), (4,14)], EntityReference(0,1))]
         ),
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 0),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, True,  True,  False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, True,  True,  True,  True,  False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, True,  True,  False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 0)},
             cost_to_state=1,
             path=[PathItem([(2,0), (2,1)], EntityReference(0,0))]
@@ -240,7 +241,7 @@ def test_get_child_states_from_beginning_touching_border():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, None), # Start at border
-        visited_mask=get_all_false_mask(test_problem.get_num_rows(), test_problem.get_num_cols()),
+        visited_mask=np.full(test_problem.total_image_mask.shape, False, dtype='bool'),
         visited_entity_ref_set=set(),
         cost_to_state=0,
         path=[]
@@ -256,26 +257,26 @@ def test_get_child_states_from_beginning_touching_border():
     exp_child_states = [
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 0),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, True,  True,  False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [True,  True,  True,  True,  False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, True,  True,  False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 0)},
             cost_to_state=1,
             path=[PathItem([(2,0)], EntityReference(0,0))]
         ),
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 1),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 1)},
             cost_to_state=1,
             path=[PathItem([(5,14), (4,14)], EntityReference(0,1))]
@@ -313,13 +314,13 @@ def test_get_child_states_from_entity():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, 1),
-        visited_mask=[
+        visited_mask=np.array([
             [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
             [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
             [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
             [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        ]),
         visited_entity_ref_set={EntityReference(0, 1)},
         cost_to_state=1,
         path=[PathItem([(0,15), (1,14)], EntityReference(0,1))]
@@ -335,26 +336,26 @@ def test_get_child_states_from_entity():
     exp_child_states = [
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, None),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 1)},
             cost_to_state=2,
             path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(1,16), (0,16)], EntityReference(0,None))]
         ),
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 0),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, True,  True,  True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, True,  True,  False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 1), EntityReference(0, 0)},
             cost_to_state=6,
             path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(2, 10), (2, 9), (2, 8), (2, 7), (2, 6), (2, 5)], EntityReference(0,0))]
@@ -388,13 +389,13 @@ def test_get_too_many_child_states_from_entity():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, 1),
-        visited_mask=[
+        visited_mask=np.array([
             [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
             [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
             [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
             [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        ]),
         visited_entity_ref_set={EntityReference(0, 1)},
         cost_to_state=1,
         path=[PathItem([(0,15), (1,14)], EntityReference(0,1))]
@@ -410,26 +411,26 @@ def test_get_too_many_child_states_from_entity():
     exp_child_states = [
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, None),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 1)},
             cost_to_state=2,
             path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(1,16), (0,16)], EntityReference(0,None))]
         ),
         LinkerSearchState(
             cur_entity_ref=EntityReference(0, 0),
-            visited_mask=[
+            visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, True,  True,  True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, True,  True,  False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-            ],
+            ]),
             visited_entity_ref_set={EntityReference(0, 1), EntityReference(0, 0)},
             cost_to_state=6,
             path=[PathItem([(0,15), (1,14)], EntityReference(0,1)), PathItem([(2, 10), (2, 9), (2, 8), (2, 7), (2, 6), (2, 5)], EntityReference(0,0))]
@@ -468,7 +469,7 @@ def test_get_child_states_entity_to_SE_border():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, 1),
-        visited_mask=[
+        visited_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
@@ -479,7 +480,7 @@ def test_get_child_states_entity_to_SE_border():
                 [False, False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, False, False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        ]),
         visited_entity_ref_set={EntityReference(0, 1)},
         cost_to_state=1,
         path=[]

@@ -1,25 +1,25 @@
 
-from src.image_parsing.blob_extraction import get_grid_mask_subtraction
+from src.utils import get_numpy_grid_mask_subtraction
 from copy import deepcopy
-
+import numpy as np
 
 def test_get_grid_mask_subtraction_basic():
-    minuend = [
+    minuend = np.array([
         [True, False],
         [True, False],
-    ]
-    subtrahend = [
+    ])
+    subtrahend = np.array([
         [True,  True ],
         [False, False],
-    ]
-    exp_result = [
+    ])
+    exp_result = np.array([
         [False, False],
         [True,  False],
-    ]
+    ])
     exp_minuend_unchanged = deepcopy(minuend)
     exp_subtrahend_unchanged = deepcopy(subtrahend)
-    result = get_grid_mask_subtraction(minuend, subtrahend)
-    assert result == exp_result
-    assert minuend == exp_minuend_unchanged
-    assert subtrahend == exp_subtrahend_unchanged
+    result = get_numpy_grid_mask_subtraction(minuend, subtrahend)
+    assert (result == exp_result).all
+    assert (minuend == exp_minuend_unchanged).all
+    assert (subtrahend == exp_subtrahend_unchanged).all
     

@@ -14,7 +14,17 @@ import numpy.typing as npt
 
 class Blob(namedtuple("Blob", ["outer_contour", "mask", "total_mask"])):
     def __eq__(self, other):
-        return self.outer_contour == other.outer_contour and (self.mask==other.mask).all() and (self.total_mask==other.total_mask).all()
+        if self.outer_contour != other.outer_contour:
+            return False
+        if type(self.mask) != type(other.mask) or type(self.mask) != type(other.mask):
+            return False
+        masks_equal = (self.mask == other.mask)
+        total_masks_equal = (self.total_mask == other.total_mask)
+        if type(self.mask) == np.ndarray:
+            masks_equal = masks_equal.all()
+        if type(self.total_mask) == np.ndarray:
+            total_masks_equal = total_masks_equal.all()
+        return masks_equal and total_masks_equal
 
 class MoveDir(Enum):
     NORTH = 0,

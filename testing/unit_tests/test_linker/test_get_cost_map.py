@@ -9,7 +9,7 @@ from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
 from src.linker.get_children import _get_cost_map
-
+import numpy as np
 
 
 def helper_pixel_grid_str_parser(pixel_grid_str):
@@ -18,7 +18,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
         pixel_grid.append(
             [0 if c == ' ' else int(c) for c in line]
         )
-    return pixel_grid
+    return np.array(pixel_grid)
 
 def helper_get_layers(pixel_grid_str):
     pixel_grid = helper_pixel_grid_str_parser(pixel_grid_str)
@@ -60,13 +60,13 @@ def test_get_cost_map_basic():
     # build the layers with the other code. Assume it to be correct
     test_problem = LinkerProblem(
         layers=layers,
-        total_image_mask=[
+        total_image_mask=np.array([
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 [False, False, True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  True,  False, False],
                 [False, True,  True,  True,  True,  False, False, False, False, False, False, True,  True,  True,  True,  True,  False, False],
                 [False, False, False, True,  True,  False, False, False, False, False, True,  True,  True,  True,  True,  True,  True,  False],
                 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-        ],
+        ]),
         cost_menu=CostMenu(
             visited_mask_cost=100000,
             future_mask_cost=0,
@@ -75,21 +75,21 @@ def test_get_cost_map_basic():
     )
     test_state = LinkerSearchState(
         cur_entity_ref=EntityReference(0, None), # Start at border
-        visited_mask=get_all_false_mask(test_problem.get_num_rows(), test_problem.get_num_cols()),
+        visited_mask=np.full(test_problem.total_image_mask.shape, False, dtype='bool'),
         visited_entity_ref_set=set(),
         cost_to_state=0,
         path=[]
     )
     recv_cost_map = _get_cost_map(test_problem, test_state)
     _helper_print_cost_map(recv_cost_map)
-    expected_cost_map = [
+    expected_cost_map = np.array([
         [ 1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00],
         [ 1.00,  1.00,  0.00,  0.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.00,  1.00,  1.00],
         [ 1.00,  0.00,  0.00,  0.00,  0.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.00,  1.00,  1.00],
         [ 1.00,  1.00,  1.00,  0.00,  0.00,  1.00,  1.00,  1.00,  1.00,  1.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.00,  1.00],
         [ 1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00],
         [ 1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00,  1.00],
-    ]
+    ])
     _helper_print_cost_map(expected_cost_map)
-    assert recv_cost_map == expected_cost_map
+    assert (recv_cost_map == expected_cost_map).all()
     

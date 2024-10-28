@@ -1,12 +1,12 @@
 
 from src.utils import get_all_false_mask
 import heapq
-from copy import deepcopy
-from src.utils import get_grid_mask_union
+from src.utils import get_numpy_grid_mask_union
 from src.linker.linkable_entity.linkable_entity import EntityReference
 from src.linker.get_children import get_child_states
 from src.linker.linker_problem import *
 import multiprocessing
+import numpy as np
 
 from src.pbar import ProgressBar
 from src.visualizer.visual_debugger import dump_linker_open_list
@@ -46,7 +46,7 @@ def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: i
     
     start_state = LinkerSearchState(
         EntityReference(0, None),
-        get_all_false_mask(problem.get_num_rows(), problem.get_num_cols()),
+        np.full(problem.total_image_mask.shape, False, dtype='bool'),
         set(),
         0,
         []
@@ -114,10 +114,10 @@ def get_single_linked_path(problem: LinkerProblem, max_children_per_expansion: i
 
 def get_linked_path(layers):
     
-    total_image_mask = deepcopy(layers[0][0].get_entity_grid_mask())
+    total_image_mask = layers[0][0].get_entity_grid_mask().copy()
     for layer in layers:
         for entity in layer:
-            total_image_mask = get_grid_mask_union(total_image_mask, entity.get_entity_grid_mask())
+            total_image_mask = get_numpy_grid_mask_union(total_image_mask, entity.get_entity_grid_mask())
     
     problem = LinkerProblem(
         layers=layers,

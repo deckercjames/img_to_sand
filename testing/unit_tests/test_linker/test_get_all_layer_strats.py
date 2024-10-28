@@ -7,6 +7,7 @@ from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
 from src.linker.linkable_entity.linkable_entity_line import LinkableEntityLine
 from testing.unit_tests.testing_helpers import helper_grid_mask_to_string
 from testing.unit_tests.testing_helpers import helper_pretty_mask_compare
+import numpy as np
 
 def helper_pixel_grid_str_parser(pixel_grid_str):
     pixel_grid = []
@@ -14,7 +15,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
         pixel_grid.append(
             [0 if c == ' ' else int(c) for c in line]
         )
-    return pixel_grid
+    return np.array(pixel_grid)
 
 def helper_get_blob_layers(pixel_grid_str):
     pixel_grid = helper_pixel_grid_str_parser(pixel_grid_str)

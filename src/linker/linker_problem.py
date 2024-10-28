@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
 from typing import List, Set
 from src.linker.linkable_entity.linkable_entity import EntityReference
+import numpy as np
+import numpy.typing as npt
 
 @dataclass
 class CostMenu:
@@ -17,7 +19,7 @@ class CostMenu:
 @dataclass
 class LinkerProblem:
     layers: List[List[LinkableEntity]]
-    total_image_mask: List[List[bool]]
+    total_image_mask: npt.NDArray
     cost_menu: CostMenu
     def get_num_rows(self):
         return len(self.total_image_mask)
@@ -32,7 +34,7 @@ PathItem = namedtuple("PathItem", ["entity_linkage_points", "next_entity_ref"])
 @dataclass
 class LinkerSearchState:
     cur_entity_ref: EntityReference
-    visited_mask: List[List[bool]]
+    visited_mask: npt.NDArray
     visited_entity_ref_set: Set[EntityReference]
     cost_to_state: float
     path: List[PathItem]
@@ -41,6 +43,7 @@ class LinkerSearchState:
     def __eq__(self, other):
         return self.cur_entity_ref == other.cur_entity_ref and self.visited_entity_ref_set == other.visited_entity_ref_set
     def __hash__(self):
+        # TODO include visited_entity_ref_set in hash
         return self.cur_entity_ref.layer_idx * 971 + (self.cur_entity_ref.entity_idx if self.cur_entity_ref.entity_idx else 900)
 """
 cur_entity_ref (EntityReference): contains the layer index, entity_index of the current entity. None means edge

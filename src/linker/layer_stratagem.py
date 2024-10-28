@@ -1,7 +1,7 @@
 
 from src.linker.zhang_suen import get_split_lines_and_blobs
 from src.utils import get_grid_mask_subtraction
-from src.linker.linkable_entity.topography import get_mask_with_inward_bleed
+from src.utils import get_numpy_mask_with_inward_bleed
 from src.linker.linkable_entity.topography import get_all_blobs_from_mask
 from src.linker.linkable_entity.linkable_entity_line import get_line_linkable_entity
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
@@ -53,7 +53,7 @@ def get_linkable_entities_from_blob(blob, num_line_errosion_itterations: int, nu
     
     # Handle micro blobs from blob
     for _ in range(num_blob_buffer_itterations):
-        micro_blobs_grid_mask = get_mask_with_inward_bleed(micro_blobs_grid_mask, diag_bleed=True)
+        micro_blobs_grid_mask = get_numpy_mask_with_inward_bleed(micro_blobs_grid_mask, diag_bleed=True)
     
     # print("micro blobs mask")
     # print(grid_mask_to_str(micro_blobs_grid_mask))
@@ -73,12 +73,17 @@ def get_all_linkable_entities_for_blob_layer(blob_layer, num_line_errosion_itter
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() - 1))
     processes = []
     
+    # multiprocessing
     for blob in blob_layer:
         process = pool.apply_async(func=get_linkable_entities_from_blob, args=(blob, num_line_errosion_itterations, num_blob_buffer_itterations))
         processes.append(process)
     
     for process in processes:
         all_linkable_entities.extend(process.get())
+    
+    # Single core
+    # for blob in blob_layer:
+    #     all_linkable_entities.extend(get_linkable_entities_from_blob(blob, num_line_errosion_itterations, num_blob_buffer_itterations))
         
     pool.close()
     pool.join()

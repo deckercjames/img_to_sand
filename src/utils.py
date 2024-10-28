@@ -65,6 +65,20 @@ def get_grid_mask_union(m1, m2):
 
     return [[(m1[r][c] or m2[r][c]) for c in range(len(m1[r]))] for r in range(len(m1))]
 
+def get_numpy_grid_mask_union(m1, m2):
+    # TODO improve
+    if type(m1) != np.ndarray or type(m2) != np.ndarray:
+        raise Exception("Union takes two numpy arrays: Types {}, {}".format(type(m1), type(m2)))
+    if m1.shape != m2.shape:
+        raise Exception("Can not union different sized masks. ({}) - ({})".format(m1.shape, m2.shape))
+
+    result = np.empty(shape=m1.shape, dtype='bool')
+    
+    for r, c in np.ndindex(m1.shape):
+        result[r,c] = m1[r,c] or m2[r,c]
+
+    return result
+
 
 def get_cyclic_list_slice(list, start_idx, end_idx):
     if end_idx > start_idx:
@@ -97,20 +111,18 @@ def check_mask_intersection(m1, m2):
     return False
     
 
-
-def get_mask_with_inward_bleed(grid_mask, diag_bleed=False):
-    result = deepcopy(grid_mask)
+def get_numpy_mask_with_inward_bleed(grid_mask, diag_bleed=False):
+    result = grid_mask.copy()
     
-    for r, row in enumerate(grid_mask):
-        for c in range(len(row)):
-            if r == 0 or r == len(grid_mask) - 1 or c == 0 or c == len(row) - 1:
-                result[r][c] = False
-                continue
-            if not grid_mask[r-1][c] or not grid_mask[r+1][c] or not grid_mask[r][c-1] or not grid_mask[r][c+1]:
-                result[r][c] = False
-                continue
-            if diag_bleed and (not grid_mask[r-1][c+1] or not grid_mask[r+1][c+1] or not grid_mask[r+1][c-1] or not grid_mask[r-1][c-1]):
-                result[r][c] = False
-                continue
+    for r, c in np.ndindex(grid_mask.shape):
+        if r == 0 or r == grid_mask.shape[0] - 1 or c == 0 or c == grid_mask.shape[1] - 1:
+            result[r][c] = False
+            continue
+        if not grid_mask[r-1][c] or not grid_mask[r+1][c] or not grid_mask[r][c-1] or not grid_mask[r][c+1]:
+            result[r][c] = False
+            continue
+        if diag_bleed and (not grid_mask[r-1][c+1] or not grid_mask[r+1][c+1] or not grid_mask[r+1][c-1] or not grid_mask[r-1][c-1]):
+            result[r][c] = False
+            continue
             
     return result

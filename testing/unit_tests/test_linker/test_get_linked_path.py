@@ -9,7 +9,7 @@ from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_gri
 from src.consolidate_tree import consolidate_blob_trees
 from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
-
+import numpy as np
 
 def helper_pixel_grid_str_parser(pixel_grid_str):
     pixel_grid = []
@@ -17,7 +17,7 @@ def helper_pixel_grid_str_parser(pixel_grid_str):
         pixel_grid.append(
             [0 if c == ' ' else int(c) for c in line]
         )
-    return pixel_grid
+    return np.array(pixel_grid)
 
 def helper_get_layers(pixel_grid_str, num_line_erosions=0):
     pixel_grid = helper_pixel_grid_str_parser(pixel_grid_str)

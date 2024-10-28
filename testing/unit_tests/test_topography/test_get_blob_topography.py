@@ -4,7 +4,7 @@ from src.linker.linkable_entity.topography import get_blob_topography
 from src.linker.linkable_entity.topography import get_all_blobs_from_mask
 from src.linker.linkable_entity.topography import get_topography_tree_visual
 from src.tree import TreeNode
-
+import numpy as np
 
 def blob_from_str_rep_helper(str_rep):
     assert len(str_rep) > 0, "BAD TEST: str_rep must have at lest one line"
@@ -12,7 +12,7 @@ def blob_from_str_rep_helper(str_rep):
     grid_mask = []
     for line in str_rep:
         grid_mask.append([False if c == ' ' else True for c in line])
-    blobs = get_all_blobs_from_mask(grid_mask)
+    blobs = get_all_blobs_from_mask(np.array(grid_mask))
     assert len(blobs) == 1, "BAD TEST: Can only extract one blob"
     return blobs[0]
 

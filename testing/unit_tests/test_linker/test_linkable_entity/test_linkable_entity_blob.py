@@ -3,7 +3,7 @@ from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
 from src.linker.linkable_entity.linkable_entity_blob import get_blob_linkable_entity
 from src.linker.linkable_entity.topography import get_all_blobs_from_mask
 
-from testing.unit_tests.testing_helpers import helper_mask_string_to_bool_mask
+from testing.unit_tests.testing_helpers import helper_mask_string_to_numpy_bool_mask
 
 from copy import deepcopy
 
@@ -34,7 +34,7 @@ def test_linkable_entity_blob_basic():
         "   ####       ",
         "              ",
     ]
-    test_grid_mask = helper_mask_string_to_bool_mask(test_grid_mask_str)
+    test_grid_mask = helper_mask_string_to_numpy_bool_mask(test_grid_mask_str)
     exp_test_grid_mask_unchanged = deepcopy(test_grid_mask)
     test_blobs = get_all_blobs_from_mask(test_grid_mask)
     assert len(test_blobs) == 1
@@ -70,6 +70,6 @@ def test_linkable_entity_blob_basic():
     assert type(recv_linkable_entity) == LinkableEntityBlob
     assert recv_entry_pts_str == exp_entry_str_rep
     assert recv_exit_pts_str == exp_exit_str_rep
-    assert recv_linkable_entity.get_entity_grid_mask() == exp_test_grid_mask_unchanged
-    assert test_grid_mask == exp_test_grid_mask_unchanged
+    assert (recv_linkable_entity.get_entity_grid_mask() == exp_test_grid_mask_unchanged).all()
+    assert (test_grid_mask == exp_test_grid_mask_unchanged).all()
 
