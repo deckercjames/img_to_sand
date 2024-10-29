@@ -6,6 +6,7 @@ from src.utils import check_grid_element_safe
 from src.utils import check_numpy_grid_element_safe
 from src.utils import get_numpy_grid_mask_subtraction
 from src.utils import get_list_element_cyclic
+from src.utils import get_simple_erosion
 
 from src.tree import TreeNode
 import numpy as np
@@ -170,6 +171,16 @@ def get_blob_mask_outer_contour(blob_mask, r, c):
     return contour
 
 
+def check_blob_significance(blob: Blob, threshold: int):
+    
+    blob_mask = blob.mask
+    
+    for _ in range(threshold):
+        blob_mask = get_simple_erosion(blob_mask)
+    
+    return blob_mask.any()
+
+
 def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
     """
     Arguments:
@@ -198,6 +209,8 @@ def get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=None):
         sub_blob_mask = get_numpy_grid_mask_subtraction(total_blob_mask, blob_mask)
         sub_blob_tree_nodes = get_blob_tree_nodes_from_pixel_grid(pixel_grid, grid_mask=sub_blob_mask)
         blob = Blob(blob_outer_contour, blob_mask, total_blob_mask)
+        if not check_blob_significance(blob, 1):
+            continue
         blob_tree_node = TreeNode(blob, sub_blob_tree_nodes)
         blob_tree_nodes.append(blob_tree_node)
     

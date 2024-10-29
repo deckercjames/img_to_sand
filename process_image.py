@@ -12,6 +12,8 @@ from src.linker.linker import get_linked_path
 from src.path_elaboration.elaborator import elaborate_path
 from src.visualizer.visual_debugger import export_path_to_image
 
+from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
+from src.linker.linkable_entity.linkable_entity_line import LinkableEntityLine
 import logging
 
 class CustomFormatter(logging.Formatter):
@@ -76,10 +78,20 @@ def process_image(input_image_path, output_visualizer_path):
     logging.info("Unwrapping consolidated blob tree..")
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
     
-    # Expand blobs to topography
+    # Expand blobs tree to entity list
     logging.info("Compiling layers...")
     layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
-    logging.debug("Got {} linkable entities".format(sum([len(layer) for layer in layers])))
+    
+    # Log
+    blob_entity_count = 0
+    line_entity_count = 0
+    for layer in layers:
+        for e in layer:
+            if type(e) == LinkableEntityBlob:
+                blob_entity_count += 1
+            elif type(e) == LinkableEntityLine:
+                line_entity_count += 1
+    logging.debug("Got {} blob entities, {} line entities, for a total of {}".format(blob_entity_count, line_entity_count, (blob_entity_count+line_entity_count)))
     
     # Link Entities
     logging.info("Linking entities...")

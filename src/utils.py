@@ -44,15 +44,7 @@ def get_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
 
 
 def get_numpy_grid_mask_subtraction(grid_mask, grid_mask_subtrahend):
-    if grid_mask.shape != grid_mask_subtrahend.shape:
-        raise Exception("Can not subtract different sized masks. ({}) - ({})".format(grid_mask.shape, grid_mask_subtrahend.shape))
-    
-    result = np.empty(shape=grid_mask.shape, dtype='bool')
-    
-    for r, c in np.ndindex(grid_mask.shape):
-        result[r,c] = grid_mask[r,c] and not grid_mask_subtrahend[r,c]
-
-    return result
+    return np.logical_and(grid_mask, np.logical_not(grid_mask_subtrahend))
 
 
 def get_all_false_mask(num_rows, num_cols):
@@ -67,17 +59,7 @@ def get_grid_mask_union(m1, m2):
 
 def get_numpy_grid_mask_union(m1, m2):
     # TODO improve
-    if type(m1) != np.ndarray or type(m2) != np.ndarray:
-        raise Exception("Union takes two numpy arrays: Types {}, {}".format(type(m1), type(m2)))
-    if m1.shape != m2.shape:
-        raise Exception("Can not union different sized masks. ({}) - ({})".format(m1.shape, m2.shape))
-
-    result = np.empty(shape=m1.shape, dtype='bool')
-    
-    for r, c in np.ndindex(m1.shape):
-        result[r,c] = m1[r,c] or m2[r,c]
-
-    return result
+    return np.logical_or(m1, m2, out=m1)
 
 
 def get_cyclic_list_slice(list, start_idx, end_idx):
@@ -124,5 +106,18 @@ def get_numpy_mask_with_inward_bleed(grid_mask, diag_bleed=False):
         if diag_bleed and (not grid_mask[r-1][c+1] or not grid_mask[r+1][c+1] or not grid_mask[r+1][c-1] or not grid_mask[r-1][c-1]):
             result[r][c] = False
             continue
+            
+    return result
+
+
+def get_simple_erosion(grid_mask):
+    
+    result = grid_mask.copy()
+    
+    for r, c in np.ndindex(grid_mask.shape):
+        if not grid_mask[r, c]:
+            continue
+        if not check_numpy_grid_element_safe(grid_mask, r+1, c, default=False) or not check_numpy_grid_element_safe(grid_mask, r-1, c, default=False) or not check_numpy_grid_element_safe(grid_mask, r, c+1, default=False) or not check_numpy_grid_element_safe(grid_mask, r, c-1, default=False):
+            result[r, c] = False
             
     return result
