@@ -98,7 +98,7 @@ def process_image(input_image_path, output_visualizer_path):
     
     # Expand blobs tree to entity list
     logging.info("Compiling layers...")
-    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=1, num_blob_buffer_itterations=0)
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
     
     # Log
     dir = "debug_output/entities/"

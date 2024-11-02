@@ -36,6 +36,9 @@ def load_image(image_path):
 
 def colors_similar(c0, c1, distance_threshold=0.2):
     
+    if (c0 == c1).all():
+        return True
+    
     dist_squared = 0
     for v0, v1 in zip(c0, c1):
         dist_squared += (int(v0) - int(v1)) ** 2
@@ -51,6 +54,8 @@ def get_flood_fill_blob_mask(pixel_grid, background_mask, r, c):
     
     blob_mask = np.full(pixel_grid.shape[0:2], False, dtype='bool')
     
+    distance_threshold_squared = (0.5 * 255) ** 2
+    
     while len(pixel_stack) > 0:
         r, c = pixel_stack.pop()
         if r < 0 or r >= pixel_grid.shape[0] or c < 0 or c >= pixel_grid.shape[1]:
@@ -61,10 +66,11 @@ def get_flood_fill_blob_mask(pixel_grid, background_mask, r, c):
         if blob_mask[r, c]:
             continue
         # check if pixel should be included
-        current_color = check_grid_element_safe(pixel_grid, r, c, default=None)
-        if current_color is None:
-            continue
-        if not colors_similar(current_color, reference_color, distance_threshold=0.5):
+        current_color = pixel_grid[r, c]
+        dist_squared = 0
+        for v0, v1 in zip(reference_color, current_color):
+            dist_squared += (int(v0) - int(v1)) ** 2
+        if dist_squared > distance_threshold_squared:
             continue
         # expand pixel
         pixel_stack.append((r + 1, c))
@@ -87,7 +93,7 @@ def get_background_mask(raw_pixel_grid):
     
     for r,c in np.ndindex(raw_pixel_grid.shape[0:2]):
         
-        result[r,c] = colors_similar((255, 255, 255, 255), raw_pixel_grid[r, c, :]) or raw_pixel_grid[r, c, 3] < 10
+        result[r,c] = raw_pixel_grid[r, c, 3] < 10 or colors_similar((255, 255, 255, 255), raw_pixel_grid[r, c, :])
         
     return result
 
