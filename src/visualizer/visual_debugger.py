@@ -7,12 +7,77 @@ from typing import List
 import os
 
 import logging
+import numpy as np
+
+def dump_grid_mask(grid_mask, image_name):
+    img = Image.new("RGB", (grid_mask.shape[1], grid_mask.shape[0]))
+    img_draw = ImageDraw.Draw(img)
+    
+    for r,c in np.ndindex(grid_mask.shape):
+        if grid_mask[r,c]:
+            color = 'black'
+        else:
+            color = 'white'
+        
+        img_draw.point((c,r), fill=color)
+    
+    img.save("debug_output/{}.png".format(image_name))
+
+
+def dump_enumerated_pixels(pixel_grid):
+    
+    dir = "debug_output/enum_pixels/"
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+    
+    img_shape = (pixel_grid.shape[1], pixel_grid.shape[0])
+    
+    colors = ['white', 'red', 'blue', 'orange', 'purple', 'green', 'yellow', 'black']
+    
+    img = Image.new("RGB", img_shape)
+    img_draw = ImageDraw.Draw(img)
+    
+    for r,c in np.ndindex(pixel_grid.shape):
+        
+        color_index = min(pixel_grid[r,c], len(colors) - 1)
+        
+        img_draw.point((c,r), fill=colors[color_index])
+        
+    img.save("debug_output/enum_pixels/{}.png".format("all_blobs"))
+
+
+def dump_raw_pixels(raw_pixel_grid):
+    
+    dir = "debug_output/enum_pixels/"
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+    
+    num_rows = raw_pixel_grid.shape[0]
+    num_cols = raw_pixel_grid.shape[1]
+    
+    img_shape = (num_cols, num_rows)
+    
+    img = Image.new("RGB", img_shape)
+    img_draw = ImageDraw.Draw(img)
+    
+    for r in range(num_rows):
+        for c in range(num_cols):
+            
+            color = tuple([int(raw_pixel_grid[r,c,k]) for k in range(4)])
+        
+            img_draw.point((c,r), fill=color)
+        
+    img.save("debug_output/enum_pixels/{}.png".format("raw_pixels"))
+
+    
+    
+
 
 def dump_linker_open_list(problem: LinkerProblem, open_list: List[LinkerSearchState], itteration: int):
     
     dir = "debug_output/linker_fringe_itter_{}/".format(itteration)
     if not os.path.isdir(dir):
-        os.mkdir(dir)    
+        os.mkdir(dir)
     
     for i, (_, search_state) in enumerate(open_list):
         img = Image.new("RGB", (problem.get_num_cols()+3, problem.get_num_rows()+3))

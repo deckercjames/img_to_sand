@@ -9,9 +9,10 @@ from src.utils import get_list_element_cyclic
 from src.utils import get_simple_erosion
 
 from src.tree import TreeNode
+from src.pbar import ProgressBar
 import numpy as np
 import numpy.typing as npt
-
+import math
 
 class Blob(namedtuple("Blob", ["outer_contour", "mask", "total_mask"])):
     def __eq__(self, other):

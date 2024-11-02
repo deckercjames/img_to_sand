@@ -1,6 +1,6 @@
 
 from src.linker.zhang_suen import get_split_lines_and_blobs
-from src.utils import get_grid_mask_subtraction
+from src.utils import get_numpy_grid_mask_subtraction
 from src.utils import get_numpy_mask_with_inward_bleed
 from src.linker.linkable_entity.topography import get_all_blobs_from_mask
 from src.linker.linkable_entity.linkable_entity_line import get_line_linkable_entity
@@ -9,24 +9,20 @@ from typing import List
 from src.linker.linkable_entity.topography import get_flood_fill_grid_mask
 from src.pbar import ProgressBar
 import multiprocessing
-
+import numpy as np
 from src.linker.linkable_entity.linkable_entity import LinkableEntity
-
+from collections import deque
 
 def get_all_separate_grid_masks(grid_mask):
     
     separate_grid_masks = []
-    
-    num_rows = len(grid_mask)
-    num_cols = len(grid_mask[0])
-    
-    for r in range(num_rows):
-        for c in range(num_cols):
-            if not grid_mask[r][c]:
-                continue
-            separate_grid_mask = get_flood_fill_grid_mask(grid_mask, r, c, diag=True)
-            separate_grid_masks.append(separate_grid_mask)
-            grid_mask = get_grid_mask_subtraction(grid_mask, separate_grid_mask)
+
+    for r, c in np.ndindex(grid_mask.shape):
+        if not grid_mask[r, c]:
+            continue
+        separate_grid_mask = get_flood_fill_grid_mask(grid_mask, r, c, diag=True)
+        separate_grid_masks.append(separate_grid_mask)
+        grid_mask = get_numpy_grid_mask_subtraction(grid_mask, separate_grid_mask)
             
     return separate_grid_masks
 

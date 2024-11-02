@@ -43,7 +43,7 @@ def colors_similar(c0, c1, distance_threshold=0.2):
     return dist_squared < (distance_threshold * 255) ** 2
     
 
-def get_flood_fill_blob_mask(pixel_grid, r, c):
+def get_flood_fill_blob_mask(pixel_grid, background_mask, r, c):
     pixel_stack = []
     pixel_stack.append((r, c))
     
@@ -55,6 +55,8 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
         r, c = pixel_stack.pop()
         if r < 0 or r >= pixel_grid.shape[0] or c < 0 or c >= pixel_grid.shape[1]:
             continue
+        if background_mask[r,c]:
+            continue
         # already visited
         if blob_mask[r, c]:
             continue
@@ -62,7 +64,7 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
         current_color = check_grid_element_safe(pixel_grid, r, c, default=None)
         if current_color is None:
             continue
-        if not colors_similar(current_color, reference_color):
+        if not colors_similar(current_color, reference_color, distance_threshold=0.5):
             continue
         # expand pixel
         pixel_stack.append((r + 1, c))
@@ -79,7 +81,18 @@ def get_flood_fill_blob_mask(pixel_grid, r, c):
 
 
 
-def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
+def get_background_mask(raw_pixel_grid):
+    
+    result = np.empty(raw_pixel_grid.shape[0:2], dtype='bool')
+    
+    for r,c in np.ndindex(raw_pixel_grid.shape[0:2]):
+        
+        result[r,c] = colors_similar((255, 255, 255, 255), raw_pixel_grid[r, c, :]) or raw_pixel_grid[r, c, 3] < 10
+        
+    return result
+
+
+def enumerate_pixels(raw_pixel_grid):
     
     enumerated_pixel_grid = np.full(raw_pixel_grid.shape[0:2], 0)
     pixel_enumeration_index = 1
@@ -89,26 +102,18 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
     num_rows = raw_pixel_grid.shape[0]
     num_cols = raw_pixel_grid.shape[1]
     
+    background_mask = get_background_mask(raw_pixel_grid)
+    
     pbar = ProgressBar(num_rows*num_cols)
     
     for r in range(num_rows):
         for c in range(num_cols):
             pbar.update()
-            if visited_mask[r, c]:
+            if background_mask[r,c] or visited_mask[r, c]:
                 continue
-            similar_color_blob_mask = get_flood_fill_blob_mask(raw_pixel_grid, r, c)
+            similar_color_blob_mask = get_flood_fill_blob_mask(raw_pixel_grid, background_mask, r, c)
             visited_mask = get_numpy_grid_mask_union(visited_mask, similar_color_blob_mask)
-            
-            # count the number of pixels in this blob to see if it enough to warrent consideration
-            blob_pixel_count = 0
-            for row in similar_color_blob_mask:
-                for cell in row:
-                    if cell:
-                        blob_pixel_count += 1
 
-            if blob_pixel_count < min_blob_size:
-                continue
-                
             # Check if this is background or not
             idx = pixel_enumeration_index
             if colors_similar((255, 255, 255, 255), raw_pixel_grid[r, c, :]) or raw_pixel_grid[r, c, 3] < 10:
@@ -124,6 +129,8 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
                 pixel_enumeration_index += 1
     
     pbar.complete()
+    
+    logging.debug("Found {} enumerations".format(pixel_enumeration_index))
             
     # print(grid_mask_to_str(visited_mask))
     
@@ -137,3 +144,42 @@ def enumerate_pixels(raw_pixel_grid, min_blob_size=20):
     # print(buf)
     
     return enumerated_pixel_grid
+
+
+def get_numpy_element_clamped(grid, r, c, k):
+    
+    r = max(0, min(grid.shape[0]-1, r))
+    c = max(0, min(grid.shape[1]-1, c))
+    k = max(0, min(grid.shape[2]-1, k))
+    
+    return grid[r,c,k]
+
+
+def sharpen_image(raw_pixel_grid):
+    
+    kernel = np.array([
+        [   0,    0, -0.2,    0,    0],
+        [   0, -0.2, -0.5, -0.2,    0],
+        [-0.2, -0.5,  3.6, -0.5, -0.2],
+        [   0, -0.2, -0.5, -0.2,    0],
+        [   0,    0, -0.2,    0,    0],
+    ])
+    
+    result = np.empty(raw_pixel_grid.shape)
+    
+    for r,c,k in np.ndindex(raw_pixel_grid.shape):
+        
+        # print(tuple(raw_pixel_grid[r,c]))
+        
+        new_value = 0
+        
+        for dr in range(-2, 3):
+            for dc in range(-2, 3):
+                kr = dr + 2
+                kc = dc + 2
+                
+                new_value += get_numpy_element_clamped(raw_pixel_grid, r+dr, c+dc, k) * kernel[kr, kc]
+                
+        result[r,c,k] = new_value
+    
+    return result

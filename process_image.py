@@ -1,5 +1,5 @@
 
-import sys
+import sys, os
 from argparse import ArgumentParser
 
 from src.image_parsing.blob_extraction import get_blob_tree_nodes_from_pixel_grid
@@ -8,9 +8,10 @@ from src.tree import unwrap_tree_post_order_traversal
 from src.linker.layer_stratagem import get_all_layer_stratagem
 from src.image_parsing.image_loader import load_image
 from src.image_parsing.image_loader import enumerate_pixels
+from src.image_parsing.image_loader import sharpen_image
 from src.linker.linker import get_linked_path
 from src.path_elaboration.elaborator import elaborate_path
-from src.visualizer.visual_debugger import export_path_to_image
+from src.visualizer.visual_debugger import export_path_to_image, dump_grid_mask, dump_enumerated_pixels, dump_raw_pixels
 
 from src.linker.linkable_entity.linkable_entity_blob import LinkableEntityBlob
 from src.linker.linkable_entity.linkable_entity_line import LinkableEntityLine
@@ -55,9 +56,16 @@ def process_image(input_image_path, output_visualizer_path):
     num_rows = len(raw_pixels)
     num_cols = len(raw_pixels[0])
     
+    # Try sharpen (doesnt seem to help)
+    # raw_pixels = sharpen_image(raw_pixels)
+    # dump_raw_pixels(raw_pixels)
+    # sys.exit(0)
+    
     # Cluster like colors
     logging.info("Enumerating pixels...")
     pixel_grid = enumerate_pixels(raw_pixels)
+
+    dump_enumerated_pixels(pixel_grid)
 
     # Extract blobs
     logging.info("Extracting blobs...")
@@ -78,19 +86,34 @@ def process_image(input_image_path, output_visualizer_path):
     logging.info("Unwrapping consolidated blob tree..")
     blob_layers = unwrap_tree_post_order_traversal(consolidated_blob_tree)
     
+    # debug dump all blobs
+    dir = "debug_output/blobs/"
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+    i = 0
+    for bl in blob_layers:
+        for blob in bl:
+            dump_grid_mask(blob.mask, "blobs/blob_{}".format(i))
+            i += 1
+    
     # Expand blobs tree to entity list
     logging.info("Compiling layers...")
-    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=0, num_blob_buffer_itterations=0)
+    layers = get_all_layer_stratagem(blob_layers, num_line_errosion_itterations=1, num_blob_buffer_itterations=0)
     
     # Log
+    dir = "debug_output/entities/"
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
     blob_entity_count = 0
     line_entity_count = 0
     for layer in layers:
         for e in layer:
             if type(e) == LinkableEntityBlob:
                 blob_entity_count += 1
+                dump_grid_mask(e.get_entity_grid_mask(), "entities/blob_entity_{:02}".format(blob_entity_count))
             elif type(e) == LinkableEntityLine:
                 line_entity_count += 1
+                dump_grid_mask(e.get_entity_grid_mask(), "entities/line_entity_{:02}".format(line_entity_count))
     logging.debug("Got {} blob entities, {} line entities, for a total of {}".format(blob_entity_count, line_entity_count, (blob_entity_count+line_entity_count)))
     
     # Link Entities

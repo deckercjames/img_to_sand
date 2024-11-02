@@ -110,7 +110,7 @@ def get_split_lines_and_blobs(blob_grid_mask, itterations):
     
     micro_blob_grid_mask = get_area_blobs(erroded_grid_mask)
     
-    blob_only_grid_mask = get_flood_fill_area_blobs(blob_grid_mask, micro_blob_grid_mask, itterations + 3)
+    blob_only_grid_mask = get_flood_fill_area_blobs(blob_grid_mask, micro_blob_grid_mask, itterations + 1)
     line_only_grid_mask = get_numpy_grid_mask_subtraction(erroded_grid_mask, blob_only_grid_mask)
     
     return (blob_only_grid_mask, line_only_grid_mask)

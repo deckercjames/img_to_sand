@@ -93,6 +93,7 @@ def check_mask_intersection(m1, m2):
     return False
     
 
+# TODO these functions are the same lol
 def get_numpy_mask_with_inward_bleed(grid_mask, diag_bleed=False):
     result = grid_mask.copy()
     
